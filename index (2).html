@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر متقدم وشامل - بديل Excel و Word</title>
+    <!-- مكتبات JavaScript الخارجية لإنشاء PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        /* ----------------------------------- */
+        /* التنسيق الأساسي والواجهة */
+        /* ----------------------------------- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            direction: rtl; 
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* جعل جميع العناوين قابلة للتحرير */
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            text-align: center;
+            outline: none; /* إزالة خط التركيز الافتراضي */
+        }
+        
+        /* ----------------------------------- */
+        /* شريط التحكم (الأزرار) */
+        /* ----------------------------------- */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+
+        button, select {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* ----------------------------------- */
+        /* محرر النصوص (Word البديل) */
+        /* ----------------------------------- */
+        .editor-section {
+            margin-bottom: 30px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+
+        .text-editor {
+            min-height: 300px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            outline: none;
+            margin-top: 10px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar button, .toolbar select {
+            background-color: #6c757d;
+            padding: 5px 10px;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+        
+        /* ----------------------------------- */
+        /* محرر الجداول (Excel البديل) */
+        /* ----------------------------------- */
+        .sheet-section {
+            overflow-x: auto; 
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            min-width: 600px; 
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: right;
+            min-width: 100px; 
+            outline: none;
+        }
+
+        .data-table th {
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        /* تحديد الخلايا */
+        .selected-cell {
+            background-color: #ffc107 !important; /* لون التحديد الأساسي */
+            outline: 2px solid #007bff;
+        }
+        .multi-selected-cell {
+            background-color: #ffc10750 !important; /* لون التحديد المتعدد */
+        }
+        .excel-controls button {
+            background-color: #28a745;
+        }
+        
+        /* ----------------------------------- */
+        /* تنسيق الطباعة (مهم جداً!) */
+        /* ----------------------------------- */
+        @media print {
+            body { background-color: white !important; padding: 0; }
+            .controls, .toolbar, .excel-controls, .no-print { display: none !important; }
+            .container { box-shadow: none !important; padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+            .text-editor, .sheet-section { border: none !important; min-height: initial !important; }
+            /* إظهار حدود الجدول في الطباعة */
+            .data-table th, .data-table td { border: 1px solid #000 !important; padding: 5px !important; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container" id="printable-content">
+        <h1 contenteditable="true">محرر متقدم وشامل (العنوان الرئيسي قابل للتحرير)</h1>
+
+        <!-- قسم التحكم والأزرار العامة -->
+        <div class="controls no-print">
+            <button onclick="printContent()">**زر الطباعة:** اطبع المحتوى</button>
+            <button onclick="downloadPDF()">**زر تحميل PDF:** حمل كملف PDF</button>
+            <button onclick="saveHTML()">**حفظ الملف:** حفظ كملف HTML للتعديل لاحقاً</button>
+        </div>
+
+        <!-- ----------------------------------- -->
+        <!-- محرر النصوص (بديل Word) -->
+        <!-- ----------------------------------- -->
+        <div class="editor-section">
+            <h2 contenteditable="true">محرر النصوص والمقالات (Word البديل)</h2>
+            
+            <div class="toolbar no-print">
+                <button onclick="formatDoc('bold')">B</button>
+                <button onclick="formatDoc('italic')">I</button>
+                <button onclick="formatDoc('underline')">U</button>
+                <button onclick="formatDoc('justifyLeft')">محاذاة لليسار</button>
+                <button onclick="formatDoc('justifyCenter')">توسيط</button>
+                <button onclick="formatDoc('justifyRight')">محاذاة لليمين</button>
+                <select onchange="formatDoc('fontSize', this.value); this.value='';" title="حجم الخط">
+                    <option value="" selected disabled>حجم</option>
+                    <option value="3">صغير</option>
+                    <option value="5">متوسط</option>
+                    <option value="7">كبير</option>
+                </select>
+                <input type="color" onchange="formatDoc('foreColor', this.value)" title="لون الخط">
+                <input type="color" onchange="formatDoc('backColor', this.value)" title="لون الخلفية">
+            </div>
+            
+            <div id="textEditor" class="text-editor" contenteditable="true">
+                <h3>هذا العنوان الفرعي قابل للتحرير أيضاً.</h3>
+                <p>يمكنك تنسيق النص بأي شكل باستخدام شريط الأدوات أعلاه. تم إضافة المزيد من خيارات التحكم في التنسيق.</p>
+                <ul>
+                    <li>اضغط على Enter لبدء سطر جديد.</li>
+                    <li>اضغط على الأزرار لتنسيق النص المختار.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ----------------------------------- -->
+        <!-- محرر الجداول (بديل Excel) -->
+        <!-- ----------------------------------- -->
+        <div class="editor-section sheet-section">
+            <h2 contenteditable="true">محرر الجداول (Excel البديل)</h2>
+            <p style="font-size: 14px; color: #6c757d;">(للتحديد المتعدد لدمج الخلايا: استخدم مفتاح **Ctrl** أو **Command** مع النقر.)</p>
+            
+            <div class="excel-controls no-print">
+                <button onclick="addRow()">إضافة صف</button>
+                <button onclick="addColumn()">إضافة عمود</button>
+                <button style="background-color: #dc3545;" onclick="removeSelectedRow()">حذف الصف المحدد</button>
+                <button style="background-color: #dc3545;" onclick="removeSelectedColumn()">حذف العمود المحدد</button>
+                <button style="background-color: #ffc107; color: #333;" onclick="mergeCells()">دمج الخلايا المحددة</button>
+                <button style="background-color: #ffc107; color: #333;" onclick="unmergeCell()">إلغاء الدمج (للخلية المفردة)</button>
+                <button onclick="calculateSum()">حساب المجموع (للخلايا المحددة)</button>
+            </div>
+            
+            <table class="data-table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th contenteditable="true">العنوان 1</th>
+                        <th contenteditable="true">العنوان 2</th>
+                        <th contenteditable="true">العنوان 3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td contenteditable="true">100</td>
+                        <td contenteditable="true">250</td>
+                        <td contenteditable="true">منتج أ</td>
+                    </tr>
+                    <tr>
+                        <td contenteditable="true">400</td>
+                        <td contenteditable="true">500</td>
+                        <td contenteditable="true">منتج ب</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // دالة تنسيق النص (بديل Word)
+        function formatDoc(command, value) {
+            document.execCommand(command, false, value);
+        }
+
+        // -----------------------------------
+        // وظائف الجداول (بديل Excel)
+        // -----------------------------------
+
+        const dataTable = document.getElementById('dataTable');
+        let selectedCells = []; // لتتبع التحديد المتعدد
+
+        // وظيفة تحديد الخلايا (تسمح بتحديد متعدد باستخدام Ctrl/Cmd)
+        dataTable.addEventListener('click', function(event) {
+            const cell = event.target.closest('td, th');
+            if (!cell) return;
+
+            // إزالة التحديد السابق من الجميع
+            selectedCells.forEach(c => c.classList.remove('selected-cell', 'multi-selected-cell'));
+            selectedCells = [];
+            
+            // إذا كان النقر بدون Ctrl/Cmd: تحديد مفرد
+            if (!event.ctrlKey && !event.metaKey) {
+                cell.classList.add('selected-cell');
+                selectedCells.push(cell);
+            } else {
+                // إذا كان النقر مع Ctrl/Cmd: تحديد متعدد
+                if (cell.classList.contains('multi-selected-cell')) {
+                    cell.classList.remove('multi-selected-cell');
+                    selectedCells = selectedCells.filter(c => c !== cell);
+                } else {
+                    cell.classList.add('multi-selected-cell');
+                    selectedCells.push(cell);
+                }
+            }
+
+            // تحديث التحديد النهائي
+            if (selectedCells.length === 1) {
+                selectedCells[0].classList.add('selected-cell');
+            } else {
+                selectedCells.forEach(c => c.classList.add('multi-selected-cell'));
+            }
+        });
+
+        // إضافة صف
+        function addRow() {
+            const tBody = dataTable.tBodies[0];
+            const colCount = dataTable.rows[0].cells.length;
+            const newRow = tBody.insertRow(-1); 
+            
+            for (let i = 0; i < colCount; i++) {
+                const newCell = newRow.insertCell(i);
+                newCell.contentEditable = 'true';
+                newCell.textContent = '';
+            }
+        }
+
+        // إضافة عمود
+        function addColumn() {
+            // إضافة عمود للرأس (Header)
+            const headerRow = dataTable.tHead.rows[0];
+            const newHeader = document.createElement('th');
+            newHeader.textContent = `عمود جديد`;
+            newHeader.contentEditable = 'true';
+            headerRow.appendChild(newHeader);
+
+            // إضافة خلايا لجميع الصفوف
+            const bodyRows = dataTable.tBodies[0].rows;
+            for (let i = 0; i < bodyRows.length; i++) {
+                const newCell = bodyRows[i].insertCell(-1); 
+                newCell.contentEditable = 'true';
+                newCell.textContent = '';
+            }
+        }
+        
+        // حذف الصف المحدد
+        function removeSelectedRow() {
+            if (selectedCells.length !== 1 || selectedCells[0].tagName === 'TH') {
+                alert('الرجاء النقر على خلية واحدة في الصف (غير العنوان) المراد حذفه.');
+                return;
+            }
+            const selectedRow = selectedCells[0].parentElement;
+            if (confirm('هل أنت متأكد من حذف هذا الصف؟')) {
+                selectedRow.remove();
+                selectedCells = [];
+            }
+        }
+
+        // حذف العمود المحدد (أكثر تعقيدًا)
+        function removeSelectedColumn() {
+            if (selectedCells.length !== 1) {
+                alert('الرجاء النقر على خلية واحدة لتحديد العمود المراد حذفه.');
+                return;
+            }
+
+            if (confirm('هل أنت متأكد من حذف هذا العمود بالكامل؟')) {
+                const columnIndex = selectedCells[0].cellIndex;
+
+                // حذف خلية الرأس
+                dataTable.tHead.rows[0].deleteCell(columnIndex);
+
+                // حذف الخلايا من جميع الصفوف
+                const bodyRows = dataTable.tBodies[0].rows;
+                for (let i = 0; i < bodyRows.length; i++) {
+                    bodyRows[i].deleteCell(columnIndex);
+                }
+                selectedCells = [];
+            }
+        }
+        
+        // -----------------------------------
+        // وظائف الدمج والحساب (المتقدمة)
+        // -----------------------------------
+
+        function mergeCells() {
+            if (selectedCells.length < 2) {
+                alert('الرجاء تحديد خليتين أو أكثر باستخدام مفتاح Ctrl/Command مع النقر للدمج.');
+                return;
+            }
+            
+            // تحديد أبعاد التحديد المستطيل (تبسيط الإجراء)
+            const rows = Array.from(new Set(selectedCells.map(c => c.parentElement.rowIndex)));
+            const cols = Array.from(new Set(selectedCells.map(c => c.cellIndex)));
+
+            if (rows.length === 0 || cols.length === 0) return;
+
+            const rowSpan = rows.length;
+            const colSpan = cols.length;
+
+            // تحديد الخلية العلوية اليمنى (الرئيسية)
+            const firstCell = dataTable.rows[Math.min(...rows)].cells[Math.min(...cols)];
+            
+            if (!firstCell) return;
+
+            // تطبيق الدمج على الخلية الرئيسية
+            firstCell.setAttribute('rowspan', rowSpan);
+            firstCell.setAttribute('colspan', colSpan);
+            firstCell.classList.remove('multi-selected-cell');
+            firstCell.classList.add('selected-cell');
+
+            // إزالة الخلايا المدموجة الأخرى
+            selectedCells.filter(c => c !== firstCell).forEach(cell => cell.remove());
+            
+            selectedCells = [firstCell];
+            alert(`تم دمج الخلايا بنجاح: ${rowSpan} صفوف و ${colSpan} أعمدة.`);
+        }
+        
+        function unmergeCell() {
+            if (selectedCells.length !== 1) {
+                alert('الرجاء تحديد الخلية المدموجة المراد إلغاء دمجها.');
+                return;
+            }
+            
+            const cell = selectedCells[0];
+            const rowSpan = parseInt(cell.getAttribute('rowspan') || 1);
+            const colSpan = parseInt(cell.getAttribute('colspan') || 1);
+
+            if (rowSpan <= 1 && colSpan <= 1) {
+                alert('الخلية المحددة ليست مدموجة.');
+                return;
+            }
+
+            if (confirm('هل أنت متأكد من إلغاء دمج هذه الخلية؟ سيتم إدراج خلايا فارغة مكان الدمج.')) {
+                
+                cell.removeAttribute('rowspan');
+                cell.removeAttribute('colspan');
+                
+                const rowIndex = cell.parentElement.rowIndex;
+                const colIndex = cell.cellIndex;
+
+                // إضافة الخلايا الفارغة المطلوبة (تبسيط الإجراء)
+                for (let r = 0; r < rowSpan; r++) {
+                    const row = dataTable.rows[rowIndex + r];
+                    if (row) {
+                        for (let c = 1; c < colSpan; c++) {
+                            const newCell = row.insertCell(colIndex + 1);
+                            newCell.contentEditable = 'true';
+                            newCell.textContent = '';
+                        }
+                    }
+                }
+                
+                selectedCells = [cell];
+            }
+        }
+        
+        function calculateSum() {
+            if (selectedCells.length === 0) {
+                alert('الرجاء تحديد الخلايا التي تحتوي على الأرقام لحساب مجموعها.');
+                return;
+            }
+
+            let sum = 0;
+            let invalidCount = 0;
+
+            selectedCells.forEach(cell => {
+                const value = parseFloat(cell.textContent.trim());
+                if (!isNaN(value)) {
+                    sum += value;
+                } else if (cell.textContent.trim() !== '') {
+                    invalidCount++;
+                }
+            });
+            
+            let message = `مجموع الخلايا المحددة هو: ${sum}`;
+            if (invalidCount > 0) {
+                message += `\n(تم تجاهل ${invalidCount} خلية غير رقمية)`;
+            }
+
+            alert(message);
+        }
+
+        // -----------------------------------
+        // وظائف الطباعة والتحميل (مكررة، تم الاحتفاظ بها)
+        // -----------------------------------
+
+        function printContent() {
+            window.print();
+        }
+
+        function saveHTML() {
+            const content = document.getElementById('printable-content').innerHTML;
+            const fullHtml = `<html><head><title>مستند محفوظ</title></head><body dir="rtl">${content}</body></html>`;
+            const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'مستند_محرر_شامل.html';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const content = document.getElementById('printable-content');
+            
+            // إخفاء الأزرار مؤقتاً قبل أخذ لقطة الشاشة
+            const controls = document.querySelectorAll('.no-print');
+            controls.forEach(c => c.style.display = 'none');
+            
+            const canvas = await html2canvas(content, { scale: 2, useCORS: true });
+            controls.forEach(c => c.style.display = 'flex'); // إظهار الأزرار مرة أخرى
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4'); 
+            const imgWidth = 210; 
+            const pageHeight = 297; 
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            pdf.save('مستند_محرر_شامل.pdf');
+        }
+    </script>
+</body>
+</html>
