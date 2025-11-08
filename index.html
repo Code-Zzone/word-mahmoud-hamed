@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المحرر المطلق: بديل Excel و Word بجودة طباعة فائقة</title>
-    <!-- مكتبات JavaScript الخارجية لإنشاء PDF -->
+    <title>المحرر الأقصى: استغناء دائم عن Excel و Word</title>
+    <!-- مكتبات JavaScript لإنشاء PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
         /* ----------------------------------- */
-        /* التنسيق الأساسي والواجهة */
+        /* التنسيق الأساسي والاستجابة لجميع الشاشات */
         /* ----------------------------------- */
         :root {
             --main-bg: #f4f4f9;
@@ -28,58 +28,67 @@
         }
 
         .container {
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
             background: var(--paper-bg);
             padding: 30px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.5s; /* للانتقال السلس إلى وضع المعاينة */
         }
 
-        /* جعل جميع العناوين والعناصر قابلة للتحرير */
-        [contenteditable="true"]:focus {
-            outline: 2px solid var(--main-color);
-            border-radius: 3px;
-        }
-
-        /* ----------------------------------- */
-        /* شريط التحكم (الأزرار) */
-        /* ----------------------------------- */
+        /* ضمان استجابة الأزرار */
         .controls {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* تسمح بلف الأزرار لأسفل على الشاشات الصغيرة */
             gap: 10px;
             margin-bottom: 20px;
             padding: 15px;
             background-color: #e9ecef;
             border-radius: 5px;
-            user-select: none; /* لمنع تحديد النص في الأزرار */
+            user-select: none;
         }
 
         button, select {
+            flex-grow: 1; /* تجعل الأزرار تتمدد بشكل أفضل */
+            min-width: 100px;
+            padding: 8px 12px;
             background-color: var(--main-color);
             color: white;
             border: none;
-            padding: 8px 12px;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
             font-weight: bold;
         }
-        button:hover { background-color: #0056b3; }
+        
+        /* تعديل الأزرار الرئيسية لطباعة */
+        .print-controls button { background-color: #28a745; flex-grow: 0; min-width: 150px;}
 
-        .print-controls button { background-color: #28a745; }
-        .print-controls button:hover { background-color: #1e7e34; }
-        .preview-btn { background-color: #ffc107; color: #333; }
+        /* تنسيق مساحات التحرير */
+        [contenteditable="true"]:focus {
+            outline: 2px solid var(--main-color);
+            border-radius: 3px;
+            min-height: 1.5em; /* لضمان ظهور المساحة حتى لو كانت فارغة */
+        }
+        .text-editor {
+            min-height: 300px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            font-size: 16px;
+        }
 
         /* ----------------------------------- */
-        /* محرر الجداول (Excel) */
+        /* الجداول والتحديد (Alt-Key Selection) */
         /* ----------------------------------- */
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            min-width: 600px; 
+            overflow-x: auto; /* مهم للاستجابة: يسمح بالتمرير الأفقي للجداول الكبيرة */
+            display: block; /* لضمان عمل overflow-x */
+        }
+        
+        /* يجعل محتوى الجدول (tbody) قابل للتمرير الأفقي */
+        .data-table > tbody {
+            display: table-row-group;
         }
 
         .data-table th, .data-table td {
@@ -88,15 +97,17 @@
             text-align: right;
             min-width: 100px; 
             outline: none;
+            white-space: nowrap; /* لمنع كسر النصوص داخل الخلايا */
         }
         
-        .selected-cell, .multi-selected-cell {
+        /* تحديد مستطيل (باستخدام زر Alt) */
+        .selected-cell {
             background-color: #ffc10750 !important;
             outline: 2px solid var(--main-color);
         }
 
         /* ----------------------------------- */
-        /* وضع المعاينة قبل الطباعة (Print Preview) */
+        /* وضع المعاينة والطباعة الفائقة */
         /* ----------------------------------- */
         .print-preview-mode {
             background-color: #ddd;
@@ -107,78 +118,63 @@
         .print-preview-mode .container {
             margin: 0 auto;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            /* يتم تعيين العرض والارتفاع الفعليين بواسطة JavaScript */
+            /* يتم تعيين العرض والارتفاع بواسطة JavaScript */
             height: auto;
         }
         
         .print-preview-mode .no-print { display: none !important; }
 
-        /* ----------------------------------- */
-        /* تنسيق الطباعة (جودة فائقة) */
-        /* ----------------------------------- */
         @media print {
-            /* 1. إخفاء جميع عناصر التحكم */
-            .no-print, .controls, .toolbar, .excel-controls, .print-preview-mode { display: none !important; }
-            
-            /* 2. تنظيف الخلفية والحدود */
-            body, .container { 
-                background-color: white !important; 
-                padding: 0 !important; 
-                margin: 0 !important; 
-                box-shadow: none !important; 
-                width: 100% !important;
-                max-width: 100% !important;
-            }
+            .no-print { display: none !important; }
+            body, .container { background-color: white !important; padding: 0 !important; margin: 0 !important; box-shadow: none !important; width: 100% !important; max-width: 100% !important;}
             .text-editor, .sheet-section { border: none !important; min-height: initial !important; }
-
-            /* 3. ضمان جودة الخطوط والعناصر */
-            * { 
-                color: #000 !important; 
-                background: none !important; 
-                text-shadow: none !important; 
-                box-shadow: none !important;
-                font-size: 11pt; /* حجم خط مثالي للطباعة */
-            }
-            
-            /* 4. إعدادات الصفحة (يتم التحكم فيها عبر JavaScript) */
-            @page { 
-                margin: 1.5cm; /* هامش قياسي للطباعة الاحترافية */
-            }
-
-            /* 5. التحكم في الطباعة حسب الجزء المحدد */
+            * { color: #000 !important; background: none !important; text-shadow: none !important; box-shadow: none !important; font-size: 11pt; }
+            @page { margin: 1.5cm; } /* هامش احترافي */
             body.print-table-only .text-editor-container, 
+            body.print-table-only .table-notes,
             body.print-text-only .sheet-section { display: none !important; }
         }
+
+        /* استجابة الشاشات الصغيرة جداً */
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column; /* جعل الأزرار تأتي فوق بعضها البعض */
+            }
+            button, select {
+                width: 100%;
+                min-width: auto;
+            }
+            .container { padding: 10px; }
+        }
+
     </style>
 </head>
 <body>
 
     <div class="container" id="printable-content">
-        <h1 contenteditable="true">المستند الرئيسي (قابل للتحرير بالكامل)</h1>
+        <h1 contenteditable="true">المحرر الأقصى: مستندك القابل للتحكم الكامل</h1>
 
         <!-- ----------------------------------- -->
         <!-- شريط التحكم الرئيسي والطباعة -->
         <!-- ----------------------------------- -->
         <div class="controls no-print">
             
-            <div style="display: flex; gap: 10px; flex-grow: 1;">
-                <!-- خيارات الطباعة -->
-                <button class="print-controls" onclick="printContent('all')">طباعة المحتوى كاملاً</button>
-                <button class="print-controls" onclick="printContent('text')">طباعة المقال/النصوص فقط</button>
-                <button class="print-controls" onclick="printContent('table')">طباعة الجدول فقط</button>
-                <button class="preview-btn" onclick="togglePreviewMode()">معاينة قبل الطباعة</button>
-            </div>
+            <!-- خيارات الطباعة -->
+            <button class="print-controls" onclick="printContent('all')">طباعة المحتوى كاملاً</button>
+            <button class="print-controls" onclick="printContent('text')">طباعة المقال/النصوص فقط</button>
+            <button class="print-controls" onclick="printContent('table')">طباعة الجدول فقط</button>
             
-            <!-- خيارات الورقة -->
+            <!-- خيارات الورقة والمعاينة -->
             <select id="paperSize" onchange="setPaperDimensions()">
-                <option value="A4">حجم الورقة: A4 (210x297mm)</option>
-                <option value="Letter">حجم الورقة: Letter (216x279mm)</option>
+                <option value="A4">حجم الورقة: A4</option>
+                <option value="Letter">حجم الورقة: Letter</option>
             </select>
             <select id="orientation" onchange="setPaperDimensions()">
                 <option value="portrait">اتجاه: عمودي</option>
                 <option value="landscape">اتجاه: أفقي</option>
             </select>
-            <button onclick="downloadPDF()">تحميل PDF (جودة عالية)</button>
+            <button class="preview-btn" onclick="togglePreviewMode()">معاينة قبل الطباعة</button>
+            <button onclick="downloadPDF()">تحميل PDF (جودة فائقة)</button>
         </div>
 
         <!-- ----------------------------------- -->
@@ -187,16 +183,15 @@
         <div class="editor-section text-editor-container">
             <h2 contenteditable="true">محرر النصوص والمقالات</h2>
             
-            <div class="toolbar controls no-print">
+            <div class="toolbar controls no-print" style="flex-wrap: nowrap; overflow-x: auto;">
                 <button onclick="formatDoc('bold')">B</button>
                 <button onclick="formatDoc('italic')">I</button>
                 <button onclick="formatDoc('underline')">U</button>
                 <select onchange="formatDoc('fontSize', this.value);">
                     <option value="3" selected>حجم 12pt</option>
                     <option value="5">حجم 16pt</option>
-                    <option value="7">حجم 24pt</option>
                 </select>
-                <select onchange="formatDoc('fontName', this.value);">
+                <select onchange="formatDoc('fontName', this.value);" style="min-width: 120px;">
                     <option value="" selected disabled>نوع الخط</option>
                     <option value="Arial">Arial</option>
                     <option value="Tahoma">Tahoma</option>
@@ -214,32 +209,49 @@
         <!-- ----------------------------------- -->
         <div class="editor-section sheet-section">
             <h2 contenteditable="true">محرر الجداول</h2>
-            <p style="font-size: 14px; color: #6c757d;">(للتحديد المتعدد للدمج/الحساب: **Ctrl/Command** مع النقر.)</p>
+            <p style="font-size: 14px; color: #6c757d;">(للتحديد لدمج/حساب: **Alt + نقر** للبداية والنهاية. أو **Ctrl/Command + نقر** للخلايا المتفرقة.)</p>
             
             <div class="excel-controls controls no-print">
                 <button onclick="addRow()">إضافة صف</button>
                 <button onclick="addColumn()">إضافة عمود</button>
                 <button style="background-color: #dc3545;" onclick="removeSelectedRow()">حذف الصف المحدد</button>
-                <button style="background-color: #ffc107; color: #333;" onclick="mergeCells()">دمج الخلايا</button>
+                <button style="background-color: #ffc107; color: #333;" onclick="mergeCells()">دمج الخلايا المحددة</button>
                 <button onclick="calculateSum()">حساب المجموع</button>
             </div>
             
-            <table class="data-table" id="dataTable">
-                <thead>
-                    <tr>
-                        <th contenteditable="true">العنوان 1</th>
-                        <th contenteditable="true">العنوان 2</th>
-                        <th contenteditable="true">العنوان 3</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td contenteditable="true">50</td>
-                        <td contenteditable="true">100</td>
-                        <td contenteditable="true">نص</td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- مساحة الكتابة الحرة فوق الجدول -->
+            <div class="table-notes" contenteditable="true" style="border: 1px dashed #ccc; padding: 10px; margin-bottom: 10px;">
+                <p style="color: #007bff;">[مساحة لكتابة ملاحظات أو عنوان خاص فوق الجدول - يمكنك إضافة أي شيء هنا]</p>
+            </div>
+
+            <div class="sheet-table-wrapper" style="overflow-x: auto;">
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th contenteditable="true">العنوان 1</th>
+                            <th contenteditable="true">العنوان 2</th>
+                            <th contenteditable="true">العنوان 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td contenteditable="true">50</td>
+                            <td contenteditable="true">100</td>
+                            <td contenteditable="true">250</td>
+                        </tr>
+                        <tr>
+                            <td contenteditable="true">300</td>
+                            <td contenteditable="true">400</td>
+                            <td contenteditable="true">700</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- مساحة الكتابة الحرة تحت الجدول -->
+            <div class="table-notes" contenteditable="true" style="border: 1px dashed #ccc; padding: 10px; margin-top: 10px;">
+                <p style="color: #007bff;">[مساحة لكتابة المجاميع النهائية أو ذيل الجدول - يمكنك إضافة أي شيء هنا]</p>
+            </div>
         </div>
     </div>
 
@@ -249,42 +261,42 @@
         // -----------------------------------
         const body = document.body;
         const printableContent = document.getElementById('printable-content');
+        const dataTable = document.getElementById('dataTable');
+        
         const paperDimensions = {
             A4: { portrait: [210, 297], landscape: [297, 210] },
             Letter: { portrait: [216, 279], landscape: [279, 216] }
         };
-        
-        // 1. تحديد أبعاد الورقة لوضع المعاينة والـ PDF
+
+        let isPreviewMode = false;
+        let selectedCells = []; 
+        let selectionStartCell = null; // جديد: لتحديد بداية التحديد المستطيل بزر Alt
+
         function setPaperDimensions() {
             const size = document.getElementById('paperSize').value;
             const orientation = document.getElementById('orientation').value;
             const [widthMM, heightMM] = paperDimensions[size][orientation];
 
-            // تعيين الأبعاد لوضع المعاينة (بـ px للاستخدام على الشاشة)
-            if (body.classList.contains('print-preview-mode')) {
-                // تحويل mm إلى px (تقريبي، 1mm ≈ 3.78px على شاشة 96dpi)
+            if (isPreviewMode) {
+                // 1mm ≈ 3.78px على شاشة 96dpi
                 printableContent.style.width = `${widthMM * 3.78}px`;
                 printableContent.style.minHeight = `${heightMM * 3.78}px`;
             }
         }
 
-        // 2. تفعيل/إلغاء وضع المعاينة قبل الطباعة
-        let isPreviewMode = false;
         function togglePreviewMode() {
             isPreviewMode = !isPreviewMode;
             body.classList.toggle('print-preview-mode', isPreviewMode);
             if (isPreviewMode) {
                 setPaperDimensions();
-                window.scrollTo(0, 0); // الانتقال لأعلى الصفحة لرؤية المعاينة بوضوح
+                window.scrollTo(0, 0); 
             } else {
                 printableContent.style.width = 'initial';
                 printableContent.style.minHeight = 'initial';
             }
         }
 
-        // 3. دالة الطباعة العامة (تتحكم في الجزء المطبوع)
         function printContent(part) {
-            // تنظيف كلاسات الطباعة السابقة
             body.classList.remove('print-table-only', 'print-text-only');
             
             if (part === 'text') {
@@ -293,45 +305,26 @@
                 body.classList.add('print-table-only');
             }
             
-            // إعداد اتجاه الطباعة للمتصفح (كـ اقتراح)
-            const orientation = document.getElementById('orientation').value;
-            // يتم التحكم في الاتجاه والجودة بشكل رئيسي في نافذة طباعة المتصفح
-            
             window.print();
-
-            // تنظيف الكلاسات بعد إتمام الطباعة
             setTimeout(() => body.classList.remove('print-table-only', 'print-text-only'), 100); 
         }
 
-        // 4. تحميل PDF بأعلى جودة
         async function downloadPDF() {
             const { jsPDF } = window.jspdf;
-            
-            // 1. تحديد الأبعاد والاتجاه لملف الـ PDF
             const size = document.getElementById('paperSize').value;
             const orientation = document.getElementById('orientation').value;
-            const [widthMM, heightMM] = paperDimensions[size][orientation];
             
-            // 2. إخفاء عناصر التحكم
             const controls = document.querySelectorAll('.no-print');
             controls.forEach(c => c.style.display = 'none');
 
-            // 3. أخذ لقطة الشاشة بأعلى دقة ممكنة (Scale: 4)
-            const canvas = await html2canvas(printableContent, { 
-                scale: 4, 
-                useCORS: true,
-                logging: false // إيقاف تسجيل الأخطاء لزيادة السرعة
-            });
-
-            // 4. إظهار الأزرار مرة أخرى
+            // استخدام Scale: 4 لجودة فائقة
+            const canvas = await html2canvas(printableContent, { scale: 4, useCORS: true, logging: false }); 
             controls.forEach(c => c.style.display = 'flex');
 
-            // 5. إنشاء ملف PDF
-            const imgData = canvas.toDataURL('image/jpeg', 1.0); // استخدام JPEG بجودة 1.0 لتقليل حجم الملف مع الحفاظ على الجودة
-            
+            const imgData = canvas.toDataURL('image/jpeg', 0.9); // JPEG لضغط الملف
             const pdfOrientation = orientation === 'portrait' ? 'p' : 'l';
-            const pdf = new jsPDF(pdfOrientation, 'mm', size); 
             
+            const pdf = new jsPDF(pdfOrientation, 'mm', size); 
             const imgWidth = pdf.internal.pageSize.getWidth();
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             let heightLeft = imgHeight;
@@ -340,7 +333,6 @@
             pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
             heightLeft -= pdf.internal.pageSize.getHeight();
 
-            // إضافة صفحات إضافية للمحتوى الطويل
             while (heightLeft >= 0) {
                 position = heightLeft - imgHeight;
                 pdf.addPage();
@@ -354,72 +346,77 @@
         // -----------------------------------
         // وظائف التحرير المتقدمة (Excel & Word)
         // -----------------------------------
-
-        // (يتم استكمال وظائف Word و Excel هنا: formatDoc, addRow, mergeCells, calculateSum)
-        // لتجنب التكرار، تم الاحتفاظ بالدوال الأساسية فقط كأمثلة، وتفترض اكتمالها كما في الكود السابق.
-
         function formatDoc(command, value) {
             document.execCommand(command, false, value);
         }
 
-        const dataTable = document.getElementById('dataTable');
-        let selectedCells = []; 
+        // دالة مساعدة للحصول على فهرس الصف والعمود الحقيقي للخلية
+        function getCellIndices(cell) {
+            let row = cell.parentElement;
+            let rowIndex = row.rowIndex;
+            let colIndex = cell.cellIndex;
+            return { rowIndex, colIndex };
+        }
 
+        // دالة تحديد الخلايا (باستخدام زر Alt)
         dataTable.addEventListener('click', function(event) {
             const cell = event.target.closest('td, th');
             if (!cell) return;
-            selectedCells.forEach(c => c.classList.remove('selected-cell', 'multi-selected-cell'));
-            if (!event.ctrlKey && !event.metaKey) {
-                selectedCells = [cell];
-            } else {
+
+            selectedCells.forEach(c => c.classList.remove('selected-cell'));
+            selectedCells = [];
+
+            if (event.altKey && selectionStartCell) {
+                // 1. تحديد مستطيل (Alt + Click)
+                const startIndices = getCellIndices(selectionStartCell);
+                const endIndices = getCellIndices(cell);
+
+                const minRow = Math.min(startIndices.rowIndex, endIndices.rowIndex);
+                const maxRow = Math.max(startIndices.rowIndex, endIndices.rowIndex);
+                const minCol = Math.min(startIndices.colIndex, endIndices.colIndex);
+                const maxCol = Math.max(startIndices.colIndex, endIndices.colIndex);
+
+                // المرور على جميع الصفوف والخلايا لاختيارها
+                Array.from(dataTable.rows).forEach(row => {
+                    const rowIndex = row.rowIndex;
+                    if (rowIndex >= minRow && rowIndex <= maxRow) {
+                        Array.from(row.cells).forEach(c => {
+                            const colIndex = c.cellIndex;
+                            if (colIndex >= minCol && colIndex <= maxCol) {
+                                selectedCells.push(c);
+                            }
+                        });
+                    }
+                });
+
+                selectionStartCell = null; // إعادة تعيين لإنهاء التحديد المستطيل
+            } else if (event.ctrlKey || event.metaKey) {
+                // 2. تحديد متفرق (Ctrl/Cmd + Click)
                 const index = selectedCells.indexOf(cell);
                 if (index > -1) { selectedCells.splice(index, 1); } 
                 else { selectedCells.push(cell); }
+            } else {
+                // 3. تحديد خلية واحدة (Single Click)
+                selectedCells = [cell];
+                selectionStartCell = cell; // تعيين نقطة بداية التحديد المستطيل المحتمل
             }
-            selectedCells.forEach(c => c.classList.add(selectedCells.length === 1 ? 'selected-cell' : 'multi-selected-cell'));
+            
+            selectedCells.forEach(c => c.classList.add('selected-cell'));
         });
         
-        function addRow() { 
-            const tBody = dataTable.tBodies[0];
-            const colCount = dataTable.rows[0].cells.length;
-            const newRow = tBody.insertRow(-1); 
-            for (let i = 0; i < colCount; i++) {
-                const newCell = newRow.insertCell(i);
-                newCell.contentEditable = 'true';
-                newCell.textContent = '';
-            }
-        }
-        function addColumn() { 
-            const headerRow = dataTable.tHead.rows[0];
-            const newHeader = document.createElement('th');
-            newHeader.textContent = `عمود جديد`;
-            newHeader.contentEditable = 'true';
-            headerRow.appendChild(newHeader);
-            const bodyRows = dataTable.tBodies[0].rows;
-            for (let i = 0; i < bodyRows.length; i++) {
-                const newCell = bodyRows[i].insertCell(-1); 
-                newCell.contentEditable = 'true';
-                newCell.textContent = '';
-            }
-        }
-        function removeSelectedRow() {
-            if (selectedCells.length !== 1 || selectedCells[0].tagName === 'TH') {
-                alert('الرجاء النقر على خلية واحدة في الصف المراد حذفه.');
-                return;
-            }
-            if (confirm('هل أنت متأكد من حذف هذا الصف؟')) {
-                selectedCells[0].parentElement.remove();
-                selectedCells = [];
-            }
-        }
-        function mergeCells() {
-            if (selectedCells.length < 2) {
+        // دمج الخلايا
+        function mergeCells() { 
+             if (selectedCells.length < 2) {
                 alert('الرجاء تحديد خليتين أو أكثر للدمج.');
                 return;
             }
-            const rows = Array.from(new Set(selectedCells.map(c => c.parentElement.rowIndex)));
-            const cols = Array.from(new Set(selectedCells.map(c => c.cellIndex)));
+            // تحديد الصفوف والأعمدة لتحديد الحجم
+            const rows = Array.from(new Set(selectedCells.map(c => getCellIndices(c).rowIndex)));
+            const cols = Array.from(new Set(selectedCells.map(c => getCellIndices(c).colIndex)));
+
             if (rows.length === 0 || cols.length === 0) return;
+            
+            // الخلية الرئيسية هي أول خلية في أعلى يمين التحديد
             const firstCell = dataTable.rows[Math.min(...rows)].cells[Math.min(...cols)];
             
             if (!firstCell) return;
@@ -427,12 +424,15 @@
             firstCell.setAttribute('rowspan', rows.length);
             firstCell.setAttribute('colspan', cols.length);
             
+            // حذف الخلايا المتبقية المحددة
             selectedCells.filter(c => c !== firstCell).forEach(cell => cell.remove());
+            
             selectedCells = [firstCell];
-            firstCell.classList.remove('multi-selected-cell');
             firstCell.classList.add('selected-cell');
             alert(`تم دمج الخلايا بنجاح: ${rows.length} صفوف و ${cols.length} أعمدة.`);
         }
+
+        // حساب المجموع
         function calculateSum() { 
             if (selectedCells.length === 0) {
                 alert('الرجاء تحديد الخلايا التي تحتوي على الأرقام لحساب مجموعها.');
@@ -450,6 +450,41 @@
                 message += `\n(تم تجاهل ${invalidCount} خلية غير رقمية)`;
             }
             alert(message);
+        }
+        
+        // (إضافة/حذف صفوف وأعمدة... نفس الدوال من الكود السابق.)
+        function addRow() { /* ... */
+            const tBody = dataTable.tBodies[0];
+            const colCount = dataTable.rows[0].cells.length;
+            const newRow = tBody.insertRow(-1); 
+            for (let i = 0; i < colCount; i++) {
+                const newCell = newRow.insertCell(i);
+                newCell.contentEditable = 'true';
+                newCell.textContent = '';
+            }
+        }
+        function addColumn() { /* ... */
+            const headerRow = dataTable.tHead.rows[0];
+            const newHeader = document.createElement('th');
+            newHeader.textContent = `عمود جديد`;
+            newHeader.contentEditable = 'true';
+            headerRow.appendChild(newHeader);
+            const bodyRows = dataTable.tBodies[0].rows;
+            for (let i = 0; i < bodyRows.length; i++) {
+                const newCell = bodyRows[i].insertCell(-1); 
+                newCell.contentEditable = 'true';
+                newCell.textContent = '';
+            }
+        }
+        function removeSelectedRow() { /* ... */
+            if (selectedCells.length !== 1 || selectedCells[0].tagName === 'TH') {
+                alert('الرجاء النقر على خلية واحدة في الصف المراد حذفه.');
+                return;
+            }
+            if (confirm('هل أنت متأكد من حذف هذا الصف؟')) {
+                selectedCells[0].parentElement.remove();
+                selectedCells = [];
+            }
         }
     </script>
 </body>
