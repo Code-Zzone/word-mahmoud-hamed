@@ -3,123 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المحرر الاحترافي - نسخة التنسيق الكامل</title>
-    <!-- استدعاء مكتبة خطوط عربية متنوعة -->
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700&family=Tajawal:wght@400;700&family=Almarai:wght@400;800&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    <title>المحرر الشامل - الحسابات والبيانات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         /* ========================================= */
-        /* التنسيقات الأساسية */
+        /* الأساسيات */
         /* ========================================= */
         :root {
-            --primary: #1976d2; /* أزرق احترافي */
-            --bg: #eceff1;
+            --primary: #2e7d32; /* أخضر مريح للعين (إكسل ستايل) */
+            --bg: #f5f5f5;
+            --border: #ccc;
         }
 
         body {
             font-family: 'Cairo', sans-serif;
             background-color: var(--bg);
             margin: 0;
-            padding-top: 140px; /* مساحة للشريط */
+            padding-top: 150px;
             direction: rtl;
         }
 
         /* شريط الأدوات */
         .toolbar {
             position: fixed; top: 0; left: 0; right: 0;
-            height: 120px; background: white;
+            height: 130px; background: white;
             border-bottom: 3px solid var(--primary);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             z-index: 1000;
-            display: flex; gap: 15px; padding: 5px 20px;
+            display: flex; gap: 10px; padding: 5px 20px;
             align-items: center; overflow-x: auto;
         }
 
         .group {
             display: flex; flex-direction: column; align-items: center;
-            border-left: 1px solid #ddd; padding-left: 15px; min-width: max-content;
+            border-left: 1px solid #ddd; padding: 0 10px; min-width: max-content;
         }
-        .group-title { font-size: 11px; color: #78909c; margin-bottom: 5px; font-weight: bold; }
-        .row { display: flex; gap: 5px; align-items: center; }
+        .group-title { font-size: 11px; color: #555; margin-bottom: 4px; font-weight: bold; }
+        .row { display: flex; gap: 5px; align-items: center; margin-bottom: 4px; }
 
-        /* الأزرار والقوائم */
         button, select {
-            padding: 6px 10px; border: 1px solid #cfd8dc; background: #fff;
+            padding: 5px 10px; border: 1px solid #ccc; background: #fff;
             cursor: pointer; border-radius: 4px; font-family: 'Cairo'; font-size: 13px;
             transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;
         }
-        button:hover { background: #e3f2fd; border-color: var(--primary); }
+        button:hover { background: #e8f5e9; border-color: var(--primary); }
+        button.active { background: #c8e6c9; border-color: var(--primary); }
         
         button.primary-btn { background: var(--primary); color: white; border: none; }
-        button.danger-btn { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
-        
-        button.active-btn { background: #bbdefb; border-color: var(--primary); }
+        button.danger-btn { color: #d32f2f; background: #ffebee; border-color: #ffcdd2; }
+        button.calc-btn { background: #fff3e0; color: #e65100; border-color: #ffe0b2; }
 
-        /* الورقة */
+        /* الألوان */
+        .color-wrapper { position: relative; width: 32px; height: 32px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: bold;}
+        .color-wrapper input { position: absolute; left: -50%; top: -50%; width: 200%; height: 200%; cursor: pointer; opacity: 0; }
+        .color-preview { width: 100%; height: 100%; position: absolute; z-index: 0; }
+        .color-icon { position: relative; z-index: 1; pointer-events: none; text-shadow: 0 0 2px white; }
+
+        /* منطقة العمل */
         .workspace {
             display: flex; flex-direction: column; align-items: center; gap: 30px; padding-bottom: 50px;
-        }
-        .page-container { position: relative; }
-        .page-header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #546e7a; color: white; padding: 5px 15px;
-            border-radius: 5px 5px 0 0; font-size: 12px;
         }
         .a4-page {
             width: 210mm; min-height: 297mm;
             background: white; padding: 20mm;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             position: relative; box-sizing: border-box;
         }
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #455a64; color: white; padding: 5px 10px;
+            border-radius: 5px 5px 0 0; font-size: 12px;
+        }
 
-        /* الكتل القابلة للتعديل */
-        .editable-block {
-            position: relative; border: 1px dashed transparent; margin-bottom: 5px;
-            min-height: 30px; /* لضمان القدرة على النقر */
-        }
-        .editable-block:hover { border-color: #b0bec5; }
-        
-        .block-tools {
-            position: absolute; right: -35px; top: 0;
-            display: none; flex-direction: column; gap: 3px;
-        }
+        /* الجداول */
+        .editable-block { position: relative; border: 1px dashed transparent; margin-bottom: 5px; }
+        .editable-block:hover { border-color: #bbb; }
+        .block-tools { position: absolute; right: -35px; top: 0; display: none; flex-direction: column; gap: 2px;}
         .editable-block:hover .block-tools { display: flex; }
-        .mini-btn { width: 28px; height: 28px; border-radius: 50%; padding: 0; }
+        .mini-btn { width: 25px; height: 25px; padding: 0; border-radius: 50%; }
 
-        /* ========================================= */
-        /* جداول Excel Style */
-        /* ========================================= */
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0 auto; }
-        th, td { border: 1px solid #bbb; padding: 5px; position: relative; word-wrap: break-word; }
-        th { background-color: #f5f5f5; font-weight: bold; text-align: center; }
-        
-        .resizer {
-            position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
-            cursor: col-resize; user-select: none; z-index: 10;
-        }
-        .selected { outline: 2px solid var(--primary); background-color: rgba(25, 118, 210, 0.1); }
+        th, td { border: 1px solid #999; padding: 5px; position: relative; word-wrap: break-word; }
+        th { background-color: #eee; font-weight: bold; text-align: center; }
 
-        /* ========================================= */
+        /* التحديد */
+        .selected { background-color: rgba(46, 125, 50, 0.2) !important; outline: 2px solid var(--primary); z-index: 10; }
+        .resizer { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; z-index: 20; }
+        
         /* الصور */
-        /* ========================================= */
-        .resizable-img-wrapper {
-            display: inline-block; position: relative; border: 1px solid transparent;
-            vertical-align: middle;
-        }
+        .resizable-img-wrapper { display: inline-block; position: relative; vertical-align: middle; border: 1px solid transparent; }
         .resizable-img-wrapper:hover { border: 1px dashed var(--primary); }
-        .resizable-img-wrapper img { display: block; max-width: 100%; pointer-events: none; }
-        .img-handle {
-            width: 12px; height: 12px; background: var(--primary);
-            position: absolute; bottom: -6px; left: -6px; cursor: sw-resize;
-            display: none; border-radius: 50%;
-        }
+        .resizable-img-wrapper img { display: block; max-width: 100%; }
+        .img-handle { width: 12px; height: 12px; background: var(--primary); position: absolute; bottom: -6px; left: -6px; cursor: sw-resize; display: none; border-radius: 50%; }
         .resizable-img-wrapper:hover .img-handle { display: block; }
 
-        /* الطباعة */
         @media print {
             .toolbar, .page-header, .block-tools, .img-handle { display: none !important; }
-            .page-container { display: none; }
-            .page-container.print-active { display: block; position: absolute; top: 0; left: 0; width: 100%; }
             .a4-page { box-shadow: none; margin: 0; width: 100%; height: auto; }
             .editable-block { border: none !important; }
         }
@@ -129,79 +109,88 @@
 
     <!-- Toolbar -->
     <div class="toolbar">
-        <!-- خفي: لرفع الصور -->
         <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
 
         <div class="group">
             <span class="group-title">إدراج</span>
             <div class="row">
                 <button onclick="addBlock('table')" class="primary-btn">▦ جدول</button>
-                <button onclick="document.getElementById('logoInput').click()" style="background:#e1f5fe; color:#0277bd;">🖼️ صورة</button>
-                <button onclick="addBlock('heading')" style="font-weight:bold;">H عنوان</button>
+                <button onclick="document.getElementById('logoInput').click()">🖼️ صورة</button>
                 <button onclick="addBlock('text')">📝 نص</button>
             </div>
-        </div>
-
-        <div class="group">
-            <span class="group-title">الخط والتنسيق</span>
             <div class="row">
-                <select id="fontSelect" onchange="changeFont(this.value)" style="width: 110px;">
-                    <option value="Cairo">خط Cairo</option>
-                    <option value="Amiri">خط أميري</option>
-                    <option value="Tajawal">خط تجوال</option>
-                    <option value="Almarai">خط المراعي</option>
-                    <option value="Reem Kufi">خط كوفي</option>
-                    <option value="Arial">Arial</option>
-                </select>
-            </div>
-            <div class="row" style="margin-top:5px;">
-                <button onclick="document.execCommand('bold')" title="عريض"><b>B</b></button>
-                <button onclick="document.execCommand('italic')" title="مائل"><i>I</i></button>
-                <input type="number" id="fontSize" value="14" style="width:50px; text-align:center" onchange="changeSize(this.value)">
-                <span style="font-size:11px">px</span>
+                <button onclick="addBlock('heading')">H عنوان</button>
+                <button onclick="addPage()" style="background:#333; color:white;">📄 صفحة +</button>
             </div>
         </div>
 
-        <div class="group">
-            <span class="group-title">محاذاة</span>
+        <!-- قسم الحسابات والبيانات (جديد) -->
+        <div class="group" style="background:#fffde7;">
+            <span class="group-title">حسابات وبيانات</span>
             <div class="row">
-                <button onclick="setAlignment('right')" title="يمين">➡️</button>
-                <button onclick="setAlignment('center')" title="توسط">⏺️</button>
-                <button onclick="setAlignment('left')" title="يسار">⬅️</button>
+                <button onclick="calcSum('alert')" class="calc-btn" title="يعرض مجموع الخلايا المحددة في رسالة">∑ مجموع المحدد</button>
+                <button onclick="calcSum('insert')" class="calc-btn" title="يدرج مجموع الخلايا المحددة في الخلية الأخيرة">📝 إدراج المجموع</button>
+            </div>
+            <div class="row">
+                <button onclick="addTotalRow()" class="calc-btn" style="font-weight:bold;">➕ صف الإجمالي</button>
             </div>
         </div>
 
         <div class="group">
-            <span class="group-title">أدوات الجدول</span>
+            <span class="group-title">ترقيم وهيكلة</span>
             <div class="row">
                 <button onclick="execTable('addrow')">➕ صف</button>
                 <button onclick="execTable('addcol')">➕ عمود</button>
-                <button onclick="deleteFullTable()" class="danger-btn" title="حذف الجدول">🗑️ حذف جدول</button>
+                <button onclick="autoNumber()" style="background:#e8f5e9;">🔢 ترقيم</button>
             </div>
-            <div class="row" style="margin-top:5px;">
-                <input type="color" id="colorInput" value="#fff176" title="لون التمييز">
-                <button onclick="applyColor('row')">لون صف</button>
-                <button onclick="autoNumber()">🔢 ترقيم</button>
+            <div class="row">
+                <button onclick="removeNumbering()" class="danger-btn" title="حذف عمود الترقيم">🚫 حذف الترقيم</button>
+                <button onclick="deleteFullTable()" class="danger-btn">🗑️ جدول</button>
             </div>
         </div>
 
-        <div class="group" style="margin-right:auto;">
-             <button onclick="addPage()" style="background:#37474f; color:#fff;">📄 صفحة جديدة +</button>
+        <div class="group" style="background:#e3f2fd;">
+            <span class="group-title">دمج وتحديد</span>
+            <div class="row">
+                <button onclick="mergeCells()">🔗 دمج</button>
+                <button onclick="unmergeCells()">💔 فك</button>
+            </div>
+            <div class="row">
+                <small style="font-size:10px; color:#1565c0;">(Ctrl + نقر للتحديد)</small>
+            </div>
+        </div>
+
+        <div class="group">
+            <span class="group-title">تنسيق</span>
+            <div class="row">
+                <div class="color-wrapper" title="لون النص">
+                    <div class="color-preview" id="tp" style="background:black;"></div><span class="color-icon" style="color:white;">A</span>
+                    <input type="color" onchange="applyColor('text',this.value); document.getElementById('tp').style.background=this.value;">
+                </div>
+                <div class="color-wrapper" title="لون الخلفية">
+                    <div class="color-preview" id="bp" style="background:yellow;"></div><span class="color-icon">🎨</span>
+                    <input type="color" onchange="applyColor('bg',this.value); document.getElementById('bp').style.background=this.value;">
+                </div>
+                <button onclick="document.execCommand('bold')"><b>B</b></button>
+            </div>
+            <div class="row">
+                <button onclick="align('right')">➡️</button>
+                <button onclick="align('center')">⏺️</button>
+                <button onclick="align('left')">⬅️</button>
+            </div>
         </div>
     </div>
 
     <!-- Workspace -->
     <div class="workspace" id="workspace">
-        <!-- الصفحة الأولى: فارغة وجاهزة -->
         <div class="page-container" id="page1">
             <div class="page-header">
                 <span>صفحة 1</span>
-                <button onclick="printThisPage('page1')" class="primary-btn" style="padding:2px 10px; font-size:11px;">🖨️ طباعة</button>
+                <button onclick="printThisPage('page1')" class="primary-btn" style="padding:2px 8px; font-size:11px;">🖨️ طباعة</button>
             </div>
             <div class="a4-page">
-                <!-- تم إزالة الجداول الافتراضية، الصفحة بيضاء تماماً -->
-                <div class="editable-block" contenteditable="true" style="color:#aaa; text-align:center; padding:20px;">
-                    <p>اضغط هنا للكتابة أو استخدم الأزرار بالأعلى للإدراج...</p>
+                <div class="editable-block" contenteditable="true" style="text-align:center; padding:20px; color:#888;">
+                    <p>ابدأ العمل هنا...</p>
                 </div>
             </div>
         </div>
@@ -209,259 +198,252 @@
 
     <script>
         // ===============================================
-        // المنطق العام والمتغيرات
+        // إدارة التحديد والجدول النشط
         // ===============================================
-        let selectedCell = null;
-        let selectedTable = null;
-        let activeBlock = null; // لتتبع العنصر النشط (جدول، صورة، نص)
+        let selectedCells = [];
+        let activeTable = null;
+        let lastClickedCell = null; // لتحديد أين نكتب المجموع
 
         document.addEventListener('click', function(e) {
-            // تتبع الخلية والجدول
-            if(e.target.closest('td, th')) {
-                if(selectedCell) selectedCell.classList.remove('selected');
-                selectedCell = e.target.closest('td, th');
-                selectedTable = selectedCell.closest('table');
-                selectedCell.classList.add('selected');
-            }
+            const cell = e.target.closest('td, th');
+            if (!cell) return;
             
-            // تتبع البلوك النشط (للمحاذاة)
-            if(e.target.closest('.editable-block')) {
-                activeBlock = e.target.closest('.editable-block');
+            activeTable = cell.closest('table');
+            lastClickedCell = cell;
+
+            if (e.ctrlKey || e.metaKey) {
+                if (selectedCells.includes(cell)) {
+                    cell.classList.remove('selected');
+                    selectedCells = selectedCells.filter(c => c !== cell);
+                } else {
+                    cell.classList.add('selected');
+                    selectedCells.push(cell);
+                }
+            } else {
+                document.querySelectorAll('.selected').forEach(c => c.classList.remove('selected'));
+                selectedCells = [cell];
+                cell.classList.add('selected');
             }
         });
 
         // ===============================================
-        // المحاذاة والخطوط (جديد)
+        // المنطق الحسابي (Calculation Logic)
         // ===============================================
-        function setAlignment(align) {
-            // الأولوية: 1. النص المحدد 2. البلوك النشط
-            
-            // محاولة محاذاة النص المحدد (داخل خلية أو فقرة)
-            document.execCommand('justify' + capitalize(align), false, null);
+        
+        // 1. حساب مجموع المحدد (Alert أو Insert)
+        function calcSum(mode) {
+            if (selectedCells.length < 1) return alert('حدد الخلايا التي تحتوي على أرقام أولاً.');
 
-            // محاذاة البلوك نفسه (للجداول والصور)
-            if (activeBlock) {
-                activeBlock.style.textAlign = align;
-            }
-        }
-
-        function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-        function changeFont(fontName) {
-            document.execCommand('fontName', false, fontName);
-        }
-
-        function changeSize(val) {
-            // طريقة لتحسين التحكم بحجم الخط
-            const sel = window.getSelection();
-            if (sel.rangeCount) {
-                // نستخدم execCommand لإنشاء span ثم نعدل حجمه
-                document.execCommand('fontSize', false, '7');
-                const fonts = document.querySelectorAll('font[size="7"]');
-                fonts.forEach(f => {
-                    f.removeAttribute('size');
-                    f.style.fontSize = val + 'px';
-                });
-            }
-            // إذا كان مجرد مؤشر داخل خلية
-            if(selectedCell) selectedCell.style.fontSize = val + 'px';
-        }
-
-        // ===============================================
-        // الإدراج (عناوين، نصوص، جداول)
-        // ===============================================
-        function addBlock(type) {
-            // البحث عن الصفحة النشطة (الأخيرة افتراضياً)
-            const pages = document.querySelectorAll('.a4-page');
-            const targetPage = pages[pages.length-1];
-
-            const div = document.createElement('div');
-            div.className = 'editable-block';
-            
-            // زر الحذف
-            div.innerHTML = `<div class="block-tools"><button class="mini-btn danger-btn" onclick="this.closest('.editable-block').remove()">X</button></div>`;
-
-            if (type === 'table') {
-                createResizableTable(div);
-            } else if (type === 'text') {
-                div.innerHTML += `<div contenteditable="true" style="padding:5px"><p>نص جديد...</p></div>`;
-            } else if (type === 'heading') {
-                div.innerHTML += `<h1 contenteditable="true" style="margin:5px 0; color:#333; text-align:center;">عنوان رئيسي</h1>`;
-            }
-
-            targetPage.appendChild(div);
-            // Scroll to bottom
-            div.scrollIntoView({behavior:'smooth', block:'center'});
-        }
-
-        // ===============================================
-        // صور (Image Logic)
-        // ===============================================
-        function handleImageUpload(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { insertImage(e.target.result); };
-                reader.readAsDataURL(input.files[0]);
-            }
-            input.value = ''; 
-        }
-
-        function insertImage(src) {
-            const pages = document.querySelectorAll('.a4-page');
-            const targetPage = pages[pages.length-1];
-
-            const div = document.createElement('div');
-            div.className = 'editable-block';
-            div.style.textAlign = 'center'; // افتراض التوسط
-            
-            div.innerHTML = `
-                <div class="block-tools"><button class="mini-btn danger-btn" onclick="this.closest('.editable-block').remove()">X</button></div>
-                <div class="resizable-img-wrapper" style="width: 200px;">
-                    <img src="${src}">
-                    <div class="img-handle"></div>
-                </div>
-            `;
-            targetPage.appendChild(div);
-            initImageResizers();
-        }
-
-        function initImageResizers() {
-            document.querySelectorAll('.img-handle').forEach(handle => {
-                if(handle.dataset.active) return;
-                handle.dataset.active = "true";
-                
-                let startX, startW, wrapper;
-                handle.addEventListener('mousedown', e => {
-                    e.preventDefault(); e.stopPropagation();
-                    wrapper = handle.closest('.resizable-img-wrapper');
-                    startX = e.clientX;
-                    startW = parseInt(getComputedStyle(wrapper).width);
-                    document.documentElement.addEventListener('mousemove', doDrag);
-                    document.documentElement.addEventListener('mouseup', stopDrag);
-                });
-                
-                function doDrag(e) {
-                    // سحب لليسار يزيد العرض (RTL)
-                    const newW = startW + (startX - e.clientX);
-                    if(newW > 20) wrapper.style.width = newW + 'px';
-                }
-                function stopDrag() {
-                    document.documentElement.removeEventListener('mousemove', doDrag);
-                    document.documentElement.removeEventListener('mouseup', stopDrag);
+            let sum = 0;
+            let count = 0;
+            selectedCells.forEach(c => {
+                // استخراج الرقم حتى لو كان بجانبه نص (مثل 500 ج.م)
+                const text = c.innerText.replace(/[^\d.-]/g, '');
+                const val = parseFloat(text);
+                if (!isNaN(val)) {
+                    sum += val;
+                    count++;
                 }
             });
+
+            if (count === 0) return alert('لم يتم العثور على أرقام في الخلايا المحددة.');
+
+            if (mode === 'alert') {
+                alert(`مجموع ${count} خلايا هو: ${sum}`);
+            } else if (mode === 'insert') {
+                // الكتابة في آخر خلية تم النقر عليها (يجب أن تكون خارج التحديد لتجنب الكتابة فوق الرقم)
+                if (lastClickedCell) {
+                    lastClickedCell.innerText = sum;
+                    // تلوين خفيف لتمييز الناتج
+                    lastClickedCell.style.fontWeight = 'bold';
+                    lastClickedCell.style.backgroundColor = '#e8f5e9';
+                } else {
+                    alert('انقر على الخلية التي تريد وضع الناتج فيها أولاً.');
+                }
+            }
         }
 
-        // ===============================================
-        // جداول (Excel Logic)
-        // ===============================================
-        function createResizableTable(container) {
-            const table = document.createElement('table');
-            table.innerHTML = `
-                <thead>
-                    <tr><th style="width:50px">م</th><th style="width:200px">البيان</th><th style="width:100px">القيمة</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>1</td><td></td><td></td></tr>
-                    <tr><td>2</td><td></td><td></td></tr>
-                </tbody>
-            `;
-            table.querySelectorAll('td, th').forEach(c => c.contentEditable = true);
-            container.appendChild(table);
-            initTableResizers(table);
-        }
+        // 2. إضافة صف الإجمالي التلقائي
+        function addTotalRow() {
+            if (!activeTable) return alert('حدد جدولاً أولاً.');
 
-        function initTableResizers(table) {
-            const cols = table.querySelectorAll('th');
-            cols.forEach(col => {
-                if(col.querySelector('.resizer')) return;
-                const resizer = document.createElement('div');
-                resizer.className = 'resizer';
-                resizer.contentEditable = false;
-                col.appendChild(resizer);
+            const row = activeTable.insertRow(-1); // صف في النهاية
+            row.style.fontWeight = 'bold';
+            row.style.backgroundColor = '#eee';
+
+            const colCount = activeTable.rows[0].cells.length;
+
+            // التكرار على كل عمود
+            for (let i = 0; i < colCount; i++) {
+                const newCell = row.insertCell(i);
+                newCell.style.border = '1px solid #999';
+                newCell.contentEditable = true;
+
+                // محاولة جمع العمود
+                let colSum = 0;
+                let hasNumbers = false;
                 
-                let x = 0, w = 0;
-                resizer.addEventListener('mousedown', e => {
-                    x = e.clientX;
-                    w = parseInt(getComputedStyle(col).width);
-                    document.addEventListener('mousemove', mm);
-                    document.addEventListener('mouseup', mu);
-                });
-                const mm = e => { col.style.width = (w - (x - e.clientX)) + 'px'; };
-                const mu = () => { document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); };
-            });
-        }
-
-        function deleteFullTable() {
-            if(selectedTable && confirm('حذف الجدول بالكامل؟')) {
-                const block = selectedTable.closest('.editable-block');
-                block ? block.remove() : selectedTable.remove();
-                selectedTable = null; selectedCell = null;
-            }
-        }
-
-        function execTable(act) {
-            if(!selectedTable) return alert('حدد جدولاً');
-            if(act === 'addrow') {
-                const r = selectedTable.insertRow(-1);
-                for(let i=0; i<selectedTable.rows[0].cells.length; i++) {
-                    let c = r.insertCell(); c.contentEditable=true; c.style.border='1px solid #bbb';
+                // نجمع كل الصفوف ما عدا العناوين والصف الجديد
+                for (let r = 1; r < activeTable.rows.length - 1; r++) {
+                    const cell = activeTable.rows[r].cells[i];
+                    if (cell) {
+                        const val = parseFloat(cell.innerText.replace(/[^\d.-]/g, ''));
+                        if (!isNaN(val)) {
+                            colSum += val;
+                            hasNumbers = true;
+                        }
+                    }
                 }
-            }
-            if(act === 'addcol') {
-                for(let r of selectedTable.rows) {
-                    let c = r.insertCell(-1); c.contentEditable=true; c.style.border='1px solid #bbb';
-                    if(r.rowIndex===0) { c.outerHTML='<th>جديد</th>'; setTimeout(()=>initTableResizers(selectedTable),50); }
+
+                if (hasNumbers) {
+                    newCell.innerText = colSum;
+                } else if (i === 0) {
+                    newCell.innerText = 'الإجمالي'; // كتابة كلمة الإجمالي في العمود الأول إذا لم يكن به أرقام
                 }
             }
         }
 
+        // ===============================================
+        // الترقيم وإزالة الترقيم
+        // ===============================================
         function autoNumber() {
-            if(!selectedTable) return;
+            if(!activeTable) return alert('حدد جدولاً.');
             let idx = -1;
-            selectedTable.querySelectorAll('th').forEach((th,i)=> { if(th.innerText.match(/م|#/)) idx=i; });
+            // البحث عن عمود موجود
+            activeTable.querySelectorAll('th').forEach((th,i)=> { if(th.innerText.match(/م|#/)) idx=i; });
+            
+            // إنشاء عمود جديد
             if(idx===-1) {
-                for(let r of selectedTable.rows) {
+                for(let r of activeTable.rows) {
                     let c = r.insertCell(0);
                     if(r.rowIndex===0) c.outerHTML='<th style="width:40px">م</th>';
-                    else { c.style.textAlign='center'; c.style.fontWeight='bold'; c.contentEditable=true; c.style.border='1px solid #bbb'; }
+                    else { c.style.textAlign='center'; c.style.fontWeight='bold'; c.contentEditable=true; c.style.border='1px solid #999'; }
                 }
-                idx=0; setTimeout(()=>initTableResizers(selectedTable),50);
+                idx=0; setTimeout(()=>initResizers(activeTable),50);
             }
+            
+            // تطبيق الأرقام
             let n=1;
-            for(let i=1; i<selectedTable.rows.length; i++) {
-                if(selectedTable.rows[i].cells[idx]) selectedTable.rows[i].cells[idx].innerText = n++;
+            for(let i=1; i<activeTable.rows.length; i++) {
+                if(activeTable.rows[i].cells[idx]) activeTable.rows[i].cells[idx].innerText = n++;
             }
         }
 
-        function applyColor(type) {
-            const c = document.getElementById('colorInput').value;
-            if(type==='row' && selectedCell) {
-                for(let cell of selectedCell.parentElement.cells) cell.style.backgroundColor = c;
+        function removeNumbering() {
+            if(!activeTable) return alert('حدد جدولاً لإلغاء ترقيمه.');
+            let idx = -1;
+            // البحث بدقة عن عمود الترقيم
+            activeTable.querySelectorAll('th').forEach((th,i)=> { 
+                if(th.innerText.trim() === 'م' || th.innerText.trim() === '#') idx=i; 
+            });
+
+            if (idx !== -1) {
+                if(confirm('تم العثور على عمود الترقيم. هل تريد حذفه؟')) {
+                    for(let r of activeTable.rows) {
+                        if(r.cells[idx]) r.deleteCell(idx);
+                    }
+                }
+            } else {
+                alert('لم يتم العثور على عمود باسم "م" أو "#". يمكنك حذف العمود يدوياً باستخدام زر "حذف عمود".');
             }
         }
 
         // ===============================================
-        // صفحات
+        // الدمج والألوان والتنسيق (Standard)
         // ===============================================
-        let pNum = 1;
+        function mergeCells() {
+            if(selectedCells.length<2) return alert('حدد خليتين بـ Ctrl');
+            const table = selectedCells[0].closest('table');
+            if(!selectedCells.every(c=>c.closest('table')===table)) return;
+            
+            let minR=Infinity,maxR=-Infinity,minC=Infinity,maxC=-Infinity;
+            selectedCells.forEach(c=>{
+                minR=Math.min(minR,c.parentElement.rowIndex); maxR=Math.max(maxR,c.parentElement.rowIndex);
+                minC=Math.min(minC,c.cellIndex); maxC=Math.max(maxC,c.cellIndex);
+            });
+            const target=selectedCells.find(c=>c.parentElement.rowIndex===minR && c.cellIndex===minC) || selectedCells[0];
+            target.rowSpan = maxR-minR+1; target.colSpan = maxC-minC+1;
+            selectedCells.forEach(c=> {if(c!==target) c.remove()});
+            selectedCells=[target]; target.classList.add('selected');
+        }
+
+        function unmergeCells() {
+            if(selectedCells.length!==1) return alert('حدد خلية مدموجة');
+            const c=selectedCells[0]; const cs=c.colSpan;
+            if(c.rowSpan===1 && cs===1) return;
+            c.colSpan=1; c.rowSpan=1;
+            for(let i=0; i<cs-1; i++) {
+                let nc=c.parentElement.insertCell(c.cellIndex+1); nc.contentEditable=true; nc.style.border='1px solid #999';
+            }
+        }
+
+        function applyColor(type, val) {
+            if(selectedCells.length>0) selectedCells.forEach(c => c.style[type==='bg'?'backgroundColor':'color'] = val);
+            else document.execCommand(type==='bg'?'hiliteColor':'foreColor', false, val);
+        }
+
+        function align(d) {
+            if(activeTable) activeTable.style.textAlign=d;
+            document.execCommand('justify'+(d==='right'?'Right':d==='left'?'Left':'Center'));
+        }
+
+        // ===============================================
+        // الوظائف الأساسية (جداول، صور، طباعة)
+        // ===============================================
+        function addBlock(type) {
+            const p = document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length-1];
+            const d = document.createElement('div'); d.className='editable-block';
+            d.innerHTML = `<div class="block-tools"><button class="mini-btn danger-btn" onclick="this.closest('.editable-block').remove()">X</button></div>`;
+            if(type==='table') createResizableTable(d);
+            else if(type==='heading') d.innerHTML+=`<h1 contenteditable="true" style="text-align:center;">عنوان</h1>`;
+            else d.innerHTML+=`<div contenteditable="true" style="padding:5px"><p>نص...</p></div>`;
+            p.appendChild(d); d.scrollIntoView({behavior:'smooth'});
+        }
+
+        function createResizableTable(c) {
+            const t = document.createElement('table');
+            t.innerHTML = `<thead><tr><th style="width:50px">م</th><th>البيان</th><th>السعر</th></tr></thead><tbody><tr><td>1</td><td></td><td></td></tr></tbody>`;
+            t.querySelectorAll('td, th').forEach(c=>c.contentEditable=true); c.appendChild(t); initResizers(t);
+        }
+        function initResizers(t) {
+            t.querySelectorAll('th').forEach(th=>{
+                if(th.querySelector('.resizer')) return;
+                const r=document.createElement('div'); r.className='resizer'; r.contentEditable=false; th.appendChild(r);
+                let x=0,w=0; r.addEventListener('mousedown',e=>{x=e.clientX; w=parseInt(getComputedStyle(th).width); document.addEventListener('mousemove',mm); document.addEventListener('mouseup',mu);});
+                const mm=e=>th.style.width=(w-(x-e.clientX))+'px'; const mu=()=>{document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu);}
+            });
+        }
+        function execTable(a) {
+            if(!activeTable) return alert('حدد جدولاً');
+            if(a==='addrow') { let r=activeTable.insertRow(-1); for(let i=0;i<activeTable.rows[0].cells.length;i++){let c=r.insertCell(); c.contentEditable=true; c.style.border='1px solid #999';} }
+            if(a==='addcol') { for(let r of activeTable.rows){let c=r.insertCell(-1); c.contentEditable=true; c.style.border='1px solid #999'; if(r.rowIndex===0){c.outerHTML='<th>جديد</th>'; setTimeout(()=>initResizers(activeTable),50);}} }
+            if(a==='delrow' && selectedCells.length) selectedCells[0].parentElement.remove();
+            if(a==='delcol' && selectedCells.length) { let idx=selectedCells[0].cellIndex; for(let r of activeTable.rows) if(r.cells[idx]) r.deleteCell(idx); }
+        }
+        function deleteFullTable() { if(activeTable && confirm('حذف الجدول؟')) activeTable.closest('.editable-block').remove(); }
+        
+        function handleImageUpload(i) {
+            if(i.files[0]) { const r=new FileReader(); r.onload=e=>{
+                const p=document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length-1];
+                const d=document.createElement('div'); d.className='editable-block'; d.style.textAlign='center';
+                d.innerHTML=`<div class="block-tools"><button class="mini-btn danger-btn" onclick="this.closest('.editable-block').remove()">X</button></div><div class="resizable-img-wrapper" style="width:200px"><img src="${e.target.result}"><div class="img-handle"></div></div>`;
+                p.appendChild(d);
+                const h=d.querySelector('.img-handle'), w=d.querySelector('.resizable-img-wrapper');
+                let sx,sw; h.addEventListener('mousedown',e=>{e.preventDefault(); e.stopPropagation(); sx=e.clientX; sw=parseInt(getComputedStyle(w).width); document.addEventListener('mousemove',dm); document.addEventListener('mouseup',sm);});
+                const dm=e=>w.style.width=(sw+(sx-e.clientX))+'px'; const sm=()=>{document.removeEventListener('mousemove',dm); document.removeEventListener('mouseup',sm);}
+            }; r.readAsDataURL(i.files[0]); } i.value='';
+        }
+        
+        let pn=1;
         function addPage() {
-            pNum++;
-            const id = 'page'+pNum;
-            const div = document.createElement('div');
-            div.className='page-container'; div.id=id;
-            div.innerHTML = `
-                <div class="page-header"><span>صفحة ${pNum}</span><button onclick="printThisPage('${id}')" class="primary-btn" style="padding:2px 10px; font-size:11px;">🖨️ طباعة</button></div>
-                <div class="a4-page"><div class="editable-block" contenteditable="true" style="padding:10px"><p>صفحة جديدة...</p></div></div>
-            `;
-            document.getElementById('workspace').appendChild(div);
-            div.scrollIntoView({behavior:'smooth'});
+            pn++; const id='p'+pn; const d=document.createElement('div'); d.id=id; d.className='page-container';
+            d.innerHTML=`<div class="page-header"><span>صفحة ${pn}</span><button onclick="printThisPage('${id}')" class="primary-btn" style="padding:2px">🖨️ طباعة</button></div><div class="a4-page"><div class="editable-block" contenteditable="true"><p>...</p></div></div>`;
+            document.getElementById('workspace').appendChild(d); d.scrollIntoView({behavior:'smooth'});
         }
-
         function printThisPage(id) {
-            document.querySelectorAll('.page-container').forEach(p => p.classList.remove('print-active'));
-            document.getElementById(id).classList.add('print-active');
-            window.print();
+            document.querySelectorAll('.page-container').forEach(c=>c.style.display='none');
+            const t=document.getElementById(id); t.style.display='block'; t.style.position='absolute'; t.style.top='0'; t.style.width='100%';
+            window.print(); setTimeout(()=>{document.querySelectorAll('.page-container').forEach(c=>{c.style.display='block'; c.style.position='relative';})},500);
         }
     </script>
 </body>
