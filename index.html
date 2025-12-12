@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المحرر الشامل - الحسابات والبيانات</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <!-- مكتبات التصدير -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         /* ========================================= */
@@ -141,22 +144,31 @@
         }
         .page-footer {
             margin-top: auto;
-            padding-top: 5mm;
+            padding-top: 8mm;
+            padding-bottom: 5mm;
             text-align: center;
-            color: #999;
-            font-size: 8pt;
+            color: #333;
+            font-size: 9pt;
             font-family: 'Cairo', sans-serif;
-            line-height: 1.2;
+            line-height: 1.6;
+            border-top: 2px solid #2e7d32;
         }
         .page-footer .company-name {
-            font-weight: normal;
-            color: #666;
-            margin-bottom: 2px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 5px;
+            font-size: 11pt;
+            letter-spacing: 1px;
+        }
+        .page-footer .company-info {
             font-size: 8pt;
+            color: #666;
+            margin: 3px 0;
         }
         .page-footer .print-date {
-            font-size: 7pt;
+            font-size: 8pt;
             color: #999;
+            margin-top: 5px;
         }
         
         /* الخط الفاصل */
@@ -177,9 +189,111 @@
             height: 0;
         }
         .page-header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #455a64; color: white; padding: 5px 10px;
-            border-radius: 5px 5px 0 0; font-size: 12px;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            color: white; 
+            padding: 8px 15px;
+            border-radius: 5px 5px 0 0; 
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* رأس الصفحة الاحترافي للتصدير */
+        .export-header {
+            display: none;
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 3px solid #1b5e20;
+        }
+        
+        .export-header.active {
+            display: block;
+        }
+        
+        .export-header .company-logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+        
+        .export-header .company-full-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .export-header .company-tagline {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        /* تذييل الصفحة الاحترافي للتصدير */
+        .export-footer {
+            display: none;
+            background: #f5f5f5;
+            border-top: 2px solid #2e7d32;
+            padding: 12px 20px;
+            text-align: center;
+            color: #333;
+            font-size: 9pt;
+        }
+        
+        .export-footer.active {
+            display: block;
+        }
+        
+        .export-footer .company-name {
+            font-weight: bold;
+            color: #2e7d32;
+            font-size: 11pt;
+            margin-bottom: 5px;
+        }
+        
+        .export-footer .company-details {
+            font-size: 8pt;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* تنسيق خاص للطباعة والتصدير */
+        @media print {
+            .toolbar, .page-header, .block-tools, .img-handle, .img-controls, 
+            .selected-img, .help-modal, .page-margin-controls, .border-controls,
+            .export-menu { 
+                display: none !important; 
+            }
+            .export-header, .export-footer {
+                display: block !important;
+            }
+            body {
+                padding: 0;
+                background: white;
+            }
+            .a4-page {
+                box-shadow: none;
+                margin: 0;
+                page-break-after: always;
+            }
+        }
+        
+        /* تنسيق خاص للتصدير */
+        .export-mode .export-header,
+        .export-mode .export-footer {
+            display: block;
+        }
+        
+        .export-mode .toolbar {
+            display: none;
+        }
+        
+        .export-mode body {
+            padding: 0;
         }
 
         /* الجداول */
@@ -226,7 +340,7 @@
             transform: scale(1.02);
         }
         
-        /* تحكم في البوردر */
+        /* تحكم في البوردر والعرض */
         .border-controls {
             position: absolute;
             top: -120px;
@@ -244,6 +358,56 @@
         }
         .editable-block.selected-block .border-controls {
             display: flex;
+        }
+        
+        /* تحكم في العرض */
+        .width-controls {
+            position: absolute;
+            top: -180px;
+            right: 0;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            gap: 8px;
+            flex-direction: column;
+            z-index: 100;
+            border: 2px solid #1976d2;
+            min-width: 220px;
+        }
+        .editable-block.selected-block .width-controls {
+            display: flex;
+        }
+        
+        .width-controls h4 {
+            margin: 0 0 8px 0;
+            color: #1976d2;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .width-preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        
+        .width-preset-btn {
+            padding: 6px;
+            border: 1px solid #1976d2;
+            background: white;
+            color: #1976d2;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        
+        .width-preset-btn:hover {
+            background: #1976d2;
+            color: white;
         }
         .border-input-group {
             display: flex;
@@ -509,6 +673,88 @@
             }
         }
         
+        /* قائمة التصدير */
+        .export-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 2000;
+            display: none;
+            min-width: 300px;
+        }
+        
+        .export-menu.active {
+            display: block;
+        }
+        
+        .export-menu h3 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            text-align: center;
+        }
+        
+        .export-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .export-btn {
+            padding: 12px 20px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .export-btn.pdf {
+            border-color: #d32f2f;
+            color: #d32f2f;
+        }
+        
+        .export-btn.pdf:hover {
+            background: #d32f2f;
+            color: white;
+        }
+        
+        .export-btn.png {
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+        
+        .export-btn.png:hover {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .export-close {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
         /* نافذة المساعدة */
         .help-modal {
             display: none;
@@ -695,6 +941,7 @@
             <span class="group-title">تحكم في المحتوى</span>
             <div class="row">
                 <button onclick="showBorderControls()" title="تحكم في البوردر">🔲 بوردر</button>
+                <button onclick="showWidthControls()" title="تحكم في العرض">📏 عرض</button>
                 <button onclick="togglePageMargins()" title="هوامش الصفحة">📐 هوامش</button>
             </div>
         </div>
@@ -709,12 +956,26 @@
             </div>
             <div class="row">
                 <button onclick="saveDocument()" class="primary-btn" title="حفظ">💾 حفظ</button>
-                <button onclick="loadDocument()" title="تحميل">📂 تحميل</button>
+                <button onclick="showExportMenu()" title="تصدير">📥 تصدير</button>
             </div>
             <div class="row">
                 <button onclick="clearPage()" class="danger-btn" title="مسح الصفحة">🗑️ مسح</button>
-                <button onclick="showHelp()" style="background:#2196F3; color:white;" title="توضيح آلية العمل">❓ مساعدة</button>
+                <button onclick="showHelp()" style="background:#2196F3; color:white; border-radius:8px; padding:10px; font-weight:bold;" title="دليل الاستخدام">❓ مساعدة</button>
             </div>
+        </div>
+    </div>
+    
+    <!-- قائمة التصدير -->
+    <div class="export-menu" id="exportMenu">
+        <button class="export-close" onclick="closeExportMenu()">✕</button>
+        <h3>📥 تصدير المستند</h3>
+        <div class="export-options">
+            <button class="export-btn pdf" onclick="exportToPDF()">
+                📄 تصدير كـ PDF
+            </button>
+            <button class="export-btn png" onclick="exportToPNG()">
+                🖼️ تصدير كـ PNG
+            </button>
         </div>
     </div>
     
@@ -780,16 +1041,31 @@
             </div>
             
             <div class="help-section">
-                <h3>💾 الحفظ والتحميل</h3>
+                <h3>💾 الحفظ والتصدير</h3>
                 <ul>
                     <li><strong>حفظ:</strong> اضغط "💾 حفظ" لحفظ المستند كملف JSON</li>
-                    <li><strong>تحميل:</strong> اضغط "📂 تحميل" لتحميل ملف محفوظ مسبقاً</li>
+                    <li><strong>تصدير PDF:</strong> اضغط "📥 تصدير" ثم اختر "PDF" لتحميل المستند كملف PDF</li>
+                    <li><strong>تصدير PNG:</strong> اضغط "📥 تصدير" ثم اختر "PNG" لتحميل المستند كصورة PNG</li>
                     <li><strong>الطباعة:</strong> اضغط زر "🖨️ طباعة" في رأس الصفحة</li>
                 </ul>
             </div>
         </div>
     </div>
-
+    
+    <!-- قائمة التصدير -->
+    <div class="export-menu" id="exportMenu">
+        <button class="export-close" onclick="closeExportMenu()">✕</button>
+        <h3>📥 تصدير المستند</h3>
+        <div class="export-options">
+            <button class="export-btn pdf" onclick="exportToPDF()">
+                📄 تصدير كـ PDF
+            </button>
+            <button class="export-btn png" onclick="exportToPNG()">
+                🖼️ تصدير كـ PNG
+            </button>
+        </div>
+    </div>
+    
     <!-- Workspace -->
     <div class="workspace" id="workspace">
         <div class="page-container" id="page1">
@@ -805,7 +1081,9 @@
                     <!-- الصفحة جاهزة للعمل -->
                 </div>
                 <div class="page-footer">
-                    <div class="company-name">Sigma Shoes EG</div>
+                    <div class="company-name">SIGMA SHOES EG</div>
+                    <div class="company-info">شركة سيجما للأحذية - مصر</div>
+                    <div class="company-info">Sigma Shoes Company - Egypt</div>
                     <div class="print-date" id="printDate1"></div>
                 </div>
             </div>
@@ -1404,6 +1682,67 @@
         // ===============================================
         // الوظائف الأساسية (جداول، صور، طباعة)
         // ===============================================
+        // متغير لتخزين نوع العنصر المراد إضافته عند النقر
+        let pendingInsertType = null;
+        
+        // إضافة إمكانية النقر في أي مكان لإضافة عنصر
+        function enableClickToInsert(type) {
+            pendingInsertType = type;
+            document.querySelectorAll('.page-content').forEach(content => {
+                content.style.cursor = 'crosshair';
+                content.title = 'انقر في المكان المطلوب لإضافة ' + (type === 'divider' ? 'خط' : 'صورة');
+            });
+        }
+        
+        // إضافة معالج النقر على page-content
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(e) {
+                const pageContent = e.target.closest('.page-content');
+                if(pageContent && pendingInsertType) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if(pendingInsertType === 'divider') {
+                        addDividerAtPosition(pageContent, e);
+                    } else if(pendingInsertType === 'image') {
+                        // فتح ملف اختيار الصورة
+                        document.getElementById('logoInput').click();
+                        window.clickPositionForImage = { x: e.offsetX, y: e.offsetY, pageContent: pageContent };
+                    }
+                    
+                    // إعادة تعيين
+                    pendingInsertType = null;
+                    document.querySelectorAll('.page-content').forEach(content => {
+                        content.style.cursor = '';
+                        content.title = '';
+                    });
+                }
+            });
+        });
+        
+        function addDividerAtPosition(pageContent, event) {
+            const d = document.createElement('div');
+            d.className = 'editable-block';
+            d.style.margin = '10px 0';
+            d.style.cursor = 'pointer';
+            d.innerHTML = `<div class="block-tools"><button class="mini-btn danger-btn" onclick="deleteBlock(this)">X</button></div>
+                <hr class="divider-line" onclick="deleteBlock(this.closest('.editable-block'))">`;
+            
+            // إدراج في المكان المناسب
+            const range = document.caretRangeFromPoint ? document.caretRangeFromPoint(event.clientX, event.clientY) : null;
+            if(range) {
+                const container = range.commonAncestorContainer;
+                if(container.nodeType === Node.TEXT_NODE) {
+                    container.parentNode.insertBefore(d, container);
+                } else {
+                    container.insertBefore(d, range.startContainer);
+                }
+            } else {
+                // إذا لم يكن هناك range، أضف في نهاية page-content
+                pageContent.appendChild(d);
+            }
+        }
+        
         function addBlock(type) {
             const p = document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length-1];
             const pageContent = p.querySelector('.page-content') || p;
@@ -1422,14 +1761,15 @@
                 d.innerHTML+=`<div contenteditable="true" style="padding:15px; margin:10px 0; background:#f9f9f9; border-right:3px solid var(--primary); line-height:1.8;" onclick="deleteTextBlock(this, event)">وصف تفصيلي...</div>`;
                 d.classList.add('deletable-text', 'draggable-text');
             } else if(type==='divider') {
-                d.innerHTML+=`<hr class="divider-line" onclick="deleteBlock(this.closest('.editable-block'))">`;
-                d.style.cursor = 'pointer';
+                // تفعيل وضع النقر لإضافة الخط
+                enableClickToInsert('divider');
+                return; // لا نضيف الخط مباشرة، ننتظر النقر
             } else {
                 d.innerHTML+=`<div contenteditable="true" style="padding:5px" onclick="deleteTextBlock(this, event)"><p>نص...</p></div>`;
                 d.classList.add('deletable-text', 'draggable-text');
             }
             
-            // إضافة أدوات التحكم في البوردر
+            // إضافة أدوات التحكم في البوردر والعرض
             if(type !== 'table' && type !== 'divider') {
                 d.innerHTML += `<div class="border-controls">
                     <div class="border-input-group">
@@ -1452,6 +1792,42 @@
                     </div>
                 </div>`;
             }
+            
+            // إضافة أدوات التحكم في العرض (لجميع العناصر ما عدا الخط)
+            if(type !== 'divider') {
+                d.innerHTML += `<div class="width-controls">
+                    <h4>📏 التحكم في العرض</h4>
+                    <div class="width-preset-buttons">
+                        <button class="width-preset-btn" onclick="setWidth('25%')">25%</button>
+                        <button class="width-preset-btn" onclick="setWidth('50%')">50%</button>
+                        <button class="width-preset-btn" onclick="setWidth('75%')">75%</button>
+                        <button class="width-preset-btn" onclick="setWidth('100%')">100%</button>
+                        <button class="width-preset-btn" onclick="setWidth('auto')">تلقائي</button>
+                        <button class="width-preset-btn" onclick="setWidth('fit-content')">ملائم</button>
+                    </div>
+                    <div class="border-input-group">
+                        <label>عرض مخصص:</label>
+                        <input type="text" id="customWidth" placeholder="مثال: 300px أو 50%" onkeypress="if(event.key==='Enter') setCustomWidth()">
+                    </div>
+                    <div class="border-input-group">
+                        <label>عرض الحد الأدنى:</label>
+                        <input type="text" id="minWidth" placeholder="مثال: 200px" onkeypress="if(event.key==='Enter') setMinWidth()">
+                    </div>
+                    <div class="border-input-group">
+                        <label>عرض الحد الأقصى:</label>
+                        <input type="text" id="maxWidth" placeholder="مثال: 600px" onkeypress="if(event.key==='Enter') setMaxWidth()">
+                    </div>
+                    <div class="border-input-group">
+                        <label>نمط العرض:</label>
+                        <select onchange="setDisplayMode(this.value)">
+                            <option value="block">Block (كامل العرض)</option>
+                            <option value="inline-block">Inline-Block (بجانب بعض)</option>
+                            <option value="flex">Flex (مرن)</option>
+                        </select>
+                    </div>
+                </div>`;
+            }
+            
             pageContent.appendChild(d);
             // إصلاح السكرول - استخدام scrollIntoView مع خيارات أفضل
             setTimeout(() => {
@@ -1659,6 +2035,106 @@
             }
         }
         
+        function showWidthControls() {
+            if(!selectedBlock && !activeTable) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            const widthControls = target.querySelector('.width-controls');
+            if(widthControls) {
+                widthControls.style.display = widthControls.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+        
+        function setWidth(value) {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            if(value === 'auto') {
+                target.style.width = 'auto';
+            } else if(value === 'fit-content') {
+                target.style.width = 'fit-content';
+            } else {
+                target.style.width = value;
+            }
+            
+            // للجداول، تطبيق العرض على الجدول نفسه
+            if(activeTable) {
+                activeTable.style.width = target.style.width;
+            }
+        }
+        
+        function setCustomWidth() {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            const customWidth = document.getElementById('customWidth').value;
+            if(customWidth) {
+                target.style.width = customWidth;
+                if(activeTable) {
+                    activeTable.style.width = customWidth;
+                }
+            }
+        }
+        
+        function setMinWidth() {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            const minWidth = document.getElementById('minWidth').value;
+            if(minWidth) {
+                target.style.minWidth = minWidth;
+                if(activeTable) {
+                    activeTable.style.minWidth = minWidth;
+                }
+            }
+        }
+        
+        function setMaxWidth() {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            const maxWidth = document.getElementById('maxWidth').value;
+            if(maxWidth) {
+                target.style.maxWidth = maxWidth;
+                if(activeTable) {
+                    activeTable.style.maxWidth = maxWidth;
+                }
+            }
+        }
+        
+        function setDisplayMode(mode) {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            target.style.display = mode;
+            
+            // للجداول، التأكد من أن العرض يعمل بشكل صحيح
+            if(activeTable && mode === 'inline-block') {
+                activeTable.style.display = 'inline-table';
+            }
+        }
+        
         function applyBorder(property, value) {
             if(!selectedBlock) return;
             
@@ -1677,6 +2153,111 @@
             if(selectedBlock.style.borderStyle !== 'none') {
                 if(!selectedBlock.style.borderWidth) selectedBlock.style.borderWidth = '1px';
                 if(!selectedBlock.style.borderColor) selectedBlock.style.borderColor = '#000';
+            }
+        }
+        
+        // ===============================================
+        // تحكم في العرض
+        // ===============================================
+        function showWidthControls() {
+            if(!selectedBlock && !activeTable) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            const widthControls = target.querySelector('.width-controls');
+            if(widthControls) {
+                widthControls.style.display = widthControls.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+        
+        function setWidth(value) {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            if(value === 'auto') {
+                target.style.width = 'auto';
+            } else if(value === 'fit-content') {
+                target.style.width = 'fit-content';
+            } else {
+                target.style.width = value;
+            }
+            
+            // للجداول، تطبيق العرض على الجدول نفسه
+            if(activeTable) {
+                activeTable.style.width = target.style.width;
+            }
+        }
+        
+        function setCustomWidth() {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            const customWidth = document.getElementById('customWidth').value;
+            if(customWidth) {
+                target.style.width = customWidth;
+                if(activeTable) {
+                    activeTable.style.width = customWidth;
+                }
+            }
+        }
+        
+        function setMinWidth() {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            const minWidth = document.getElementById('minWidth').value;
+            if(minWidth) {
+                target.style.minWidth = minWidth;
+                if(activeTable) {
+                    activeTable.style.minWidth = minWidth;
+                }
+            }
+        }
+        
+        function setMaxWidth() {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            const maxWidth = document.getElementById('maxWidth').value;
+            if(maxWidth) {
+                target.style.maxWidth = maxWidth;
+                if(activeTable) {
+                    activeTable.style.maxWidth = maxWidth;
+                }
+            }
+        }
+        
+        function setDisplayMode(mode) {
+            const target = selectedBlock || (activeTable ? activeTable.closest('.editable-block') : null);
+            if(!target) {
+                alert('حدد محتوى أو جدول أولاً');
+                return;
+            }
+            
+            target.style.display = mode;
+            
+            // للجداول، التأكد من أن العرض يعمل بشكل صحيح
+            if(activeTable && mode === 'inline-block') {
+                activeTable.style.display = 'inline-table';
+            } else if(activeTable) {
+                activeTable.style.display = 'table';
             }
         }
         
@@ -1824,42 +2405,187 @@
             alert('تم الحفظ بنجاح!');
         }
         
-        function loadDocument() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                if(!file) return;
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    try {
-                        const data = JSON.parse(event.target.result);
-                        if(data.html) {
-                            if(confirm('سيتم استبدال المحتوى الحالي. هل تريد المتابعة؟')) {
-                                document.getElementById('workspace').innerHTML = data.html;
-                                // إعادة تهيئة الصور
-                                document.querySelectorAll('.resizable-img-wrapper').forEach(wrapper => {
-                                    setupImageHandlers(wrapper);
-                                });
-                                alert('تم التحميل بنجاح!');
-                            }
-                        } else {
-                            alert('ملف غير صالح');
-                        }
-                    } catch(err) {
-                        alert('خطأ في قراءة الملف: ' + err.message);
-                    }
-                };
-                reader.readAsText(file);
+        // ===============================================
+        // التصدير إلى PDF و PNG
+        // ===============================================
+        function showExportMenu() {
+            document.getElementById('exportMenu').classList.add('active');
+        }
+        
+        function closeExportMenu() {
+            document.getElementById('exportMenu').classList.remove('active');
+        }
+        
+        function exportToPDF() {
+            const workspace = document.getElementById('workspace');
+            
+            // إنشاء نسخة من workspace مع رأس وتذييل احترافيين
+            const exportContainer = document.createElement('div');
+            exportContainer.style.cssText = 'background: white; padding: 0; margin: 0;';
+            
+            // إضافة رأس احترافي
+            const header = document.createElement('div');
+            header.className = 'export-header active';
+            header.innerHTML = `
+                <div class="company-logo">SIGMA SHOES</div>
+                <div class="company-full-name">Sigma Shoes EG</div>
+                <div class="company-tagline">شركة سيجما للأحذية - مصر | Sigma Shoes Company - Egypt</div>
+            `;
+            exportContainer.appendChild(header);
+            
+            // نسخ محتوى workspace
+            const workspaceClone = workspace.cloneNode(true);
+            // إخفاء أزرار التحكم في الصفحات
+            workspaceClone.querySelectorAll('.page-header').forEach(h => {
+                h.style.display = 'none';
+            });
+            exportContainer.appendChild(workspaceClone);
+            
+            // إضافة تذييل احترافي
+            const footer = document.createElement('div');
+            footer.className = 'export-footer active';
+            footer.innerHTML = `
+                <div class="company-name">SIGMA SHOES EG</div>
+                <div class="company-details">
+                    شركة سيجما للأحذية - مصر | Sigma Shoes Company - Egypt<br>
+                    تم الإنشاء في: ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })} | 
+                    ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
+            `;
+            exportContainer.appendChild(footer);
+            
+            // إضافة للصفحة مؤقتاً
+            document.body.appendChild(exportContainer);
+            
+            const opt = {
+                margin: [5, 5, 5, 5],
+                filename: 'Sigma_Shoes_Document_' + new Date().getTime() + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
-            input.click();
+            
+            closeExportMenu();
+            
+            // إظهار رسالة تحميل
+            const loadingMsg = document.createElement('div');
+            loadingMsg.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border:2px solid #2e7d32; border-radius:10px; z-index:3000; box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+            loadingMsg.innerHTML = '<p style="margin:0; font-size:16px; color:#2e7d32;">⏳ جاري تصدير PDF...</p>';
+            document.body.appendChild(loadingMsg);
+            
+            html2pdf().set(opt).from(exportContainer).save().then(() => {
+                document.body.removeChild(exportContainer);
+                document.body.removeChild(loadingMsg);
+                alert('✅ تم تصدير PDF بنجاح!');
+            }).catch(err => {
+                document.body.removeChild(exportContainer);
+                document.body.removeChild(loadingMsg);
+                alert('❌ حدث خطأ أثناء التصدير: ' + err.message);
+            });
+        }
+        
+        function exportToPNG() {
+            const workspace = document.getElementById('workspace');
+            
+            // إنشاء نسخة من workspace مع رأس وتذييل احترافيين
+            const exportContainer = document.createElement('div');
+            exportContainer.style.cssText = 'background: white; padding: 0; margin: 0; width: 210mm;';
+            
+            // إضافة رأس احترافي
+            const header = document.createElement('div');
+            header.className = 'export-header active';
+            header.innerHTML = `
+                <div class="company-logo">SIGMA SHOES</div>
+                <div class="company-full-name">Sigma Shoes EG</div>
+                <div class="company-tagline">شركة سيجما للأحذية - مصر | Sigma Shoes Company - Egypt</div>
+            `;
+            exportContainer.appendChild(header);
+            
+            // نسخ محتوى workspace
+            const workspaceClone = workspace.cloneNode(true);
+            // إخفاء أزرار التحكم في الصفحات
+            workspaceClone.querySelectorAll('.page-header').forEach(h => {
+                h.style.display = 'none';
+            });
+            exportContainer.appendChild(workspaceClone);
+            
+            // إضافة تذييل احترافي
+            const footer = document.createElement('div');
+            footer.className = 'export-footer active';
+            footer.innerHTML = `
+                <div class="company-name">SIGMA SHOES EG</div>
+                <div class="company-details">
+                    شركة سيجما للأحذية - مصر | Sigma Shoes Company - Egypt<br>
+                    تم الإنشاء في: ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })} | 
+                    ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
+            `;
+            exportContainer.appendChild(footer);
+            
+            // إضافة للصفحة مؤقتاً
+            document.body.appendChild(exportContainer);
+            
+            closeExportMenu();
+            
+            // إظهار رسالة تحميل
+            const loadingMsg = document.createElement('div');
+            loadingMsg.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:20px; border:2px solid #1976d2; border-radius:10px; z-index:3000; box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+            loadingMsg.innerHTML = '<p style="margin:0; font-size:16px; color:#1976d2;">⏳ جاري تصدير PNG...</p>';
+            document.body.appendChild(loadingMsg);
+            
+            html2canvas(exportContainer, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                width: exportContainer.scrollWidth,
+                height: exportContainer.scrollHeight
+            }).then(canvas => {
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'Sigma_Shoes_Document_' + new Date().getTime() + '.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    document.body.removeChild(exportContainer);
+                    document.body.removeChild(loadingMsg);
+                    alert('✅ تم تصدير PNG بنجاح!');
+                }, 'image/png');
+            }).catch(err => {
+                document.body.removeChild(exportContainer);
+                document.body.removeChild(loadingMsg);
+                alert('❌ حدث خطأ أثناء التصدير: ' + err.message);
+            });
+        }
+        
+        // إغلاق قائمة التصدير عند النقر خارجها
+        const exportMenu = document.getElementById('exportMenu');
+        if(exportMenu) {
+            exportMenu.addEventListener('click', function(e) {
+                if(e.target === this) {
+                    closeExportMenu();
+                }
+            });
         }
         
         function clearPage() {
             if(confirm('هل تريد مسح كل محتوى الصفحة الحالية؟')) {
                 const page = document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length - 1];
-                page.innerHTML = '<div class="page-content"></div><div class="page-footer"><div class="company-name">Sigma Shoes EG</div><div class="print-date" id="printDate1"></div></div>';
+                page.innerHTML = '<div class="page-content"></div><div class="page-footer"><div class="company-name">SIGMA SHOES EG</div><div class="company-info">شركة سيجما للأحذية - مصر</div><div class="company-info">Sigma Shoes Company - Egypt</div><div class="print-date" id="printDate1"></div></div>';
                 updatePrintDate('printDate1');
                 selectedImage = null;
                 selectedBlock = null;
@@ -1937,23 +2663,19 @@
             }
             
             if(pages.length === 1) {
-                // صفحة واحدة فقط - أضف الصورة مباشرة
-                document.getElementById('logoInput').click();
+                // صفحة واحدة فقط - تفعيل وضع النقر لإضافة الصورة
+                enableClickToInsert('image');
+                alert('انقر في المكان المطلوب في الصفحة لإضافة الصورة');
             } else {
                 // عدة صفحات - اختر الصفحة
-                let options = '';
-                pages.forEach((page, index) => {
-                    const pageNum = page.querySelector('.page-header span').textContent;
-                    options += `<option value="${page.id}">${pageNum}</option>`;
-                });
-                
                 const selectedPage = prompt(`اختر رقم الصفحة (1-${pages.length}):\n${Array.from(pages).map((p, i) => `${i+1}. ${p.querySelector('.page-header span').textContent}`).join('\n')}`);
                 
                 if(selectedPage) {
                     const pageIndex = parseInt(selectedPage) - 1;
                     if(pageIndex >= 0 && pageIndex < pages.length) {
                         window.selectedPageForImage = pages[pageIndex].id;
-                        document.getElementById('logoInput').click();
+                        enableClickToInsert('image');
+                        alert('انقر في المكان المطلوب في الصفحة لإضافة الصورة');
                     }
                 }
             }
@@ -1963,26 +2685,29 @@
             if(i.files[0]) { 
                 const r=new FileReader(); 
                 r.onload=e=>{
-                    let p;
-                    if(window.selectedPageForImage) {
-                        p = document.getElementById(window.selectedPageForImage).querySelector('.a4-page');
+                    let pageContent;
+                    if(window.clickPositionForImage) {
+                        // استخدام الموضع المحدد بالنقر
+                        pageContent = window.clickPositionForImage.pageContent;
+                        window.clickPositionForImage = null;
+                    } else if(window.selectedPageForImage) {
+                        pageContent = document.getElementById(window.selectedPageForImage).querySelector('.page-content');
                         window.selectedPageForImage = null;
                     } else {
-                        p = document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length-1];
+                        pageContent = document.querySelectorAll('.page-content')[document.querySelectorAll('.page-content').length-1];
                     }
+                    
                     const d=document.createElement('div'); 
                     d.className='editable-block'; 
                     d.style.textAlign='center';
                     d.style.position='relative';
-                    
-                    // وضع الصورة في وسط الصفحة
-                    const pageRect = p.getBoundingClientRect();
-                    const centerX = (pageRect.width / 2) - 100;
-                    const centerY = (pageRect.height / 2) - 100;
+                    d.style.margin='10px 0';
+                    d.style.display='inline-block';
+                    d.style.width='100%';
                     
                     d.innerHTML=`<div class="block-tools"><button class="mini-btn danger-btn" onclick="deleteBlock(this)">X</button></div>
-                        <div class="resizable-img-wrapper selected-img" style="left:${centerX}px; top:${centerY}px; width:200px;">
-                            <img src="${e.target.result}">
+                        <div class="resizable-img-wrapper selected-img" style="position:relative; display:inline-block; width:200px; margin:10px auto;">
+                            <img src="${e.target.result}" style="max-width:100%; height:auto; display:block;">
                             <div class="img-handle bottom-right"></div>
                             <div class="img-handle bottom-left"></div>
                             <div class="img-handle top-right"></div>
@@ -2031,11 +2756,15 @@
                                 </div>
                             </div>
                         </div>`;
-                    p.appendChild(d);
+                    pageContent.appendChild(d);
                     
                     const wrapper = d.querySelector('.resizable-img-wrapper');
                     selectedImage = wrapper;
                     setupImageHandlers(wrapper);
+                    
+                    // جعل الصورة قابلة للسحب
+                    d.classList.add('draggable-text');
+                    makeDraggable(d);
                 }; 
                 r.readAsDataURL(i.files[0]); 
             } 
@@ -2046,7 +2775,7 @@
         function addPage() {
             pn++; const id='p'+pn; const d=document.createElement('div'); d.id=id; d.className='page-container';
             const dateId = 'printDate' + pn;
-            d.innerHTML=`<div class="page-header"><span>صفحة ${pn}</span><div style="display:flex; gap:5px;"><button onclick="printThisPage('${id}')" class="primary-btn" style="padding:2px 8px; font-size:11px;">🖨️ طباعة</button><button onclick="deletePage('${id}')" class="danger-btn" style="padding:2px 8px; font-size:11px;" title="حذف الصفحة">🗑️ حذف</button></div></div><div class="a4-page"><div class="page-content"></div><div class="page-footer"><div class="company-name">Sigma Shoes EG</div><div class="print-date" id="${dateId}"></div></div></div>`;
+            d.innerHTML=`<div class="page-header"><span>صفحة ${pn}</span><div style="display:flex; gap:5px;"><button onclick="printThisPage('${id}')" class="primary-btn" style="padding:2px 8px; font-size:11px;">🖨️ طباعة</button><button onclick="deletePage('${id}')" class="danger-btn" style="padding:2px 8px; font-size:11px;" title="حذف الصفحة">🗑️ حذف</button></div></div><div class="a4-page"><div class="page-content"></div><div class="page-footer"><div class="company-name">SIGMA SHOES EG</div><div class="company-info">شركة سيجما للأحذية - مصر</div><div class="company-info">Sigma Shoes Company - Egypt</div><div class="print-date" id="${dateId}"></div></div></div>`;
             document.getElementById('workspace').appendChild(d); 
             updatePrintDate(dateId);
             setTimeout(() => {
