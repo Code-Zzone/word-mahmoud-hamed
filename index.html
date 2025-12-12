@@ -20,27 +20,86 @@
             font-family: 'Cairo', sans-serif;
             background-color: var(--bg);
             margin: 0;
-            padding-top: 150px;
+            padding-right: 280px;
             direction: rtl;
         }
 
-        /* شريط الأدوات */
+        /* Sidebar احترافي */
         .toolbar {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: 130px; background: white;
-            border-bottom: 3px solid var(--primary);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: fixed; 
+            top: 0; 
+            right: 0; 
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+            border-left: 3px solid var(--primary);
+            box-shadow: -4px 0 12px rgba(0,0,0,0.1);
             z-index: 1000;
-            display: flex; gap: 10px; padding: 5px 20px;
-            align-items: center; overflow-x: auto;
+            display: flex; 
+            flex-direction: column;
+            gap: 10px; 
+            padding: 15px 10px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .toolbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .toolbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .toolbar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .toolbar-toggle {
+            display: none;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1001;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
         }
 
         .group {
-            display: flex; flex-direction: column; align-items: center;
-            border-left: 1px solid #ddd; padding: 0 10px; min-width: max-content;
+            display: flex; 
+            flex-direction: column; 
+            align-items: stretch;
+            border-bottom: 1px solid #ddd; 
+            padding: 10px 0;
+            margin-bottom: 5px;
         }
-        .group-title { font-size: 11px; color: #555; margin-bottom: 4px; font-weight: bold; }
-        .row { display: flex; gap: 5px; align-items: center; margin-bottom: 4px; }
+        .group-title { 
+            font-size: 12px; 
+            color: var(--primary); 
+            margin-bottom: 8px; 
+            font-weight: bold;
+            padding: 5px 10px;
+            background: rgba(46, 125, 50, 0.1);
+            border-radius: 5px;
+        }
+        .row { 
+            display: flex; 
+            flex-direction: column;
+            gap: 5px; 
+            align-items: stretch; 
+            margin-bottom: 5px;
+            padding: 0 5px;
+        }
+        .row.horizontal {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
 
         button, select {
             padding: 5px 10px; border: 1px solid #ccc; background: #fff;
@@ -69,6 +128,53 @@
             background: white; padding: 20mm;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             position: relative; box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        .a4-page.drag-over {
+            background-color: #e8f5e9;
+            border: 2px dashed var(--primary);
+        }
+        .page-content {
+            flex: 1;
+            min-height: 0;
+        }
+        .page-footer {
+            margin-top: auto;
+            padding-top: 5mm;
+            text-align: center;
+            color: #999;
+            font-size: 8pt;
+            font-family: 'Cairo', sans-serif;
+            line-height: 1.2;
+        }
+        .page-footer .company-name {
+            font-weight: normal;
+            color: #666;
+            margin-bottom: 2px;
+            font-size: 8pt;
+        }
+        .page-footer .print-date {
+            font-size: 7pt;
+            color: #999;
+        }
+        
+        /* الخط الفاصل */
+        .divider-line {
+            width: 100%;
+            height: 1px;
+            background: #ddd;
+            margin: 10px 0;
+            border: none;
+        }
+        .divider-line.thick {
+            height: 2px;
+            background: #999;
+        }
+        .divider-line.dashed {
+            border-top: 1px dashed #ccc;
+            background: none;
+            height: 0;
         }
         .page-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -77,11 +183,165 @@
         }
 
         /* الجداول */
-        .editable-block { position: relative; border: 1px dashed transparent; margin-bottom: 5px; }
-        .editable-block:hover { border-color: #bbb; }
-        .block-tools { position: absolute; right: -35px; top: 0; display: none; flex-direction: column; gap: 2px;}
-        .editable-block:hover .block-tools { display: flex; }
-        .mini-btn { width: 25px; height: 25px; padding: 0; border-radius: 50%; }
+        .editable-block { 
+            position: relative; 
+            border: 1px dashed transparent; 
+            margin-bottom: 15px; 
+            padding: 5px;
+            transition: all 0.2s;
+        }
+        .editable-block:hover { 
+            border-color: #bbb; 
+            background: rgba(46, 125, 50, 0.02);
+        }
+        .editable-block.deletable-text {
+            cursor: pointer;
+        }
+        .editable-block.deletable-text:hover {
+            background: rgba(211, 47, 47, 0.1);
+            border-color: #d32f2f;
+        }
+        .editable-block.deletable-text::after {
+            content: '🗑️';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 16px;
+        }
+        .editable-block.deletable-text:hover::after {
+            opacity: 1;
+        }
+        .editable-block.draggable-table,
+        .editable-block.draggable-text {
+            cursor: move;
+        }
+        .editable-block.draggable-table.dragging,
+        .editable-block.draggable-text.dragging {
+            opacity: 0.7;
+            z-index: 1000;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            transform: scale(1.02);
+        }
+        
+        /* تحكم في البوردر */
+        .border-controls {
+            position: absolute;
+            top: -120px;
+            right: 0;
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            gap: 8px;
+            flex-direction: column;
+            z-index: 100;
+            border: 2px solid var(--primary);
+            min-width: 220px;
+        }
+        .editable-block.selected-block .border-controls {
+            display: flex;
+        }
+        .border-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+        }
+        .border-input-group label {
+            min-width: 80px;
+            font-weight: bold;
+        }
+        .border-input-group input,
+        .border-input-group select {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        /* تحكم في هوامش الصفحة */
+        .page-margin-controls {
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 220px;
+            border: 3px solid var(--primary);
+        }
+        .page-margin-controls.active {
+            display: flex;
+        }
+        .page-margin-controls h3 {
+            margin: 0 0 10px 0;
+            color: var(--primary);
+            font-size: 16px;
+            text-align: center;
+        }
+        .margin-control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .margin-control-group label {
+            min-width: 70px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .margin-control-group input {
+            width: 70px;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .margin-control-group button {
+            padding: 6px 12px;
+            margin-top: 5px;
+        }
+        .block-tools { 
+            position: absolute; 
+            right: -35px; 
+            top: 0; 
+            display: none; 
+            flex-direction: column; 
+            gap: 2px;
+            z-index: 50;
+        }
+        .editable-block:hover .block-tools,
+        .editable-block.selected-block .block-tools { 
+            display: flex; 
+        }
+        .mini-btn { 
+            width: 28px; 
+            height: 28px; 
+            padding: 0; 
+            border-radius: 50%; 
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .mini-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+        .editable-block.selected-block {
+            border-color: var(--primary) !important;
+            border-style: solid !important;
+        }
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0 auto; }
         th, td { border: 1px solid #999; padding: 5px; position: relative; word-wrap: break-word; }
@@ -92,34 +352,243 @@
         .resizer { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; cursor: col-resize; z-index: 20; }
         
         /* الصور */
-        .resizable-img-wrapper { display: inline-block; position: relative; vertical-align: middle; border: 1px solid transparent; }
-        .resizable-img-wrapper:hover { border: 1px dashed var(--primary); }
-        .resizable-img-wrapper img { display: block; max-width: 100%; }
-        .img-handle { width: 12px; height: 12px; background: var(--primary); position: absolute; bottom: -6px; left: -6px; cursor: sw-resize; display: none; border-radius: 50%; }
-        .resizable-img-wrapper:hover .img-handle { display: block; }
+        .resizable-img-wrapper { 
+            display: inline-block; 
+            position: absolute; 
+            vertical-align: middle; 
+            border: 1px solid transparent; 
+            margin: 0;
+            padding: 0;
+            transition: border 0.2s;
+            cursor: move;
+            z-index: 5;
+        }
+        .resizable-img-wrapper.dragging {
+            opacity: 0.7;
+            z-index: 1000;
+        }
+        .resizable-img-wrapper:hover { 
+            border: 1px dashed var(--primary); 
+        }
+        .resizable-img-wrapper.selected-img { 
+            border: 2px solid var(--primary); 
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+        }
+        .resizable-img-wrapper img { 
+            display: block; 
+            width: 100%; 
+            height: auto; 
+            pointer-events: auto;
+            cursor: move;
+        }
+        .img-margin-controls {
+            position: absolute;
+            top: -280px;
+            right: 0;
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: none;
+            gap: 8px;
+            flex-direction: column;
+            z-index: 100;
+            border: 1px solid #ddd;
+            min-width: 220px;
+            max-height: 250px;
+            overflow-y: auto;
+            pointer-events: auto;
+        }
+        .resizable-img-wrapper.selected-img .img-margin-controls {
+            display: flex;
+        }
+        .margin-input-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+        }
+        .margin-input-group label {
+            min-width: 60px;
+            font-weight: bold;
+        }
+        .margin-input-group input {
+            width: 50px;
+            padding: 3px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .img-handle { 
+            width: 14px; 
+            height: 14px; 
+            background: var(--primary); 
+            position: absolute; 
+            cursor: nwse-resize; 
+            display: none; 
+            border-radius: 50%; 
+            border: 2px solid white; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        .img-handle.bottom-right { bottom: -7px; right: -7px; }
+        .img-handle.bottom-left { bottom: -7px; left: -7px; cursor: nesw-resize; }
+        .img-handle.top-right { top: -7px; right: -7px; cursor: nesw-resize; }
+        .img-handle.top-left { top: -7px; left: -7px; }
+        .resizable-img-wrapper:hover .img-handle,
+        .resizable-img-wrapper.selected-img .img-handle { 
+            display: block; 
+        }
+        .img-controls { 
+            position: absolute; 
+            top: -50px; 
+            right: 0; 
+            background: white; 
+            padding: 8px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
+            display: none; 
+            gap: 5px; 
+            flex-wrap: wrap; 
+            z-index: 100; 
+            border: 1px solid #ddd;
+            pointer-events: auto;
+        }
+        .resizable-img-wrapper.selected-img .img-controls { 
+            display: flex; 
+        }
+        .img-controls button { 
+            padding: 4px 8px; 
+            font-size: 11px; 
+            min-width: 30px;
+        }
+        
+        /* حجم الخط */
+        .font-size-control { display: flex; align-items: center; gap: 5px; }
+        .font-size-control input { width: 50px; padding: 3px; border: 1px solid #ccc; border-radius: 3px; text-align: center; }
+        .font-size-control select { padding: 3px; border: 1px solid #ccc; border-radius: 3px; }
 
+        @media (max-width: 768px) {
+            body {
+                padding-right: 0;
+            }
+            .toolbar {
+                transform: translateX(100%);
+                transition: transform 0.3s;
+            }
+            .toolbar.active {
+                transform: translateX(0);
+            }
+            .toolbar-toggle {
+                display: block;
+            }
+        }
+        
         @media print {
-            .toolbar, .page-header, .block-tools, .img-handle { display: none !important; }
-            .a4-page { box-shadow: none; margin: 0; width: 100%; height: auto; }
-            .editable-block { border: none !important; }
+            .toolbar, .page-header, .block-tools, .img-handle, .img-controls, .selected-img, .help-modal, .page-margin-controls, .border-controls { 
+                display: none !important; 
+            }
+            .resizable-img-wrapper { 
+                border: none !important; 
+            }
+            .a4-page { 
+                box-shadow: none; 
+                margin: 0; 
+                width: 100%; 
+                height: auto; 
+            }
+            .editable-block { 
+                border: none !important; 
+            }
+            .page-footer {
+                position: absolute;
+                bottom: 10mm;
+                left: 0;
+                right: 0;
+                width: 100%;
+            }
+        }
+        
+        /* نافذة المساعدة */
+        .help-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            overflow-y: auto;
+        }
+        .help-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .help-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .help-content h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .help-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .help-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .help-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .help-section li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .help-section li:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
 <body>
 
+    <!-- Toggle Button -->
+    <button class="toolbar-toggle" onclick="toggleSidebar()">☰</button>
+    
     <!-- Toolbar -->
-    <div class="toolbar">
+    <div class="toolbar" id="sidebar">
         <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
 
         <div class="group">
             <span class="group-title">إدراج</span>
             <div class="row">
                 <button onclick="addBlock('table')" class="primary-btn">▦ جدول</button>
-                <button onclick="document.getElementById('logoInput').click()">🖼️ صورة</button>
+                <button onclick="addImageWithPageSelect()">🖼️ صورة</button>
                 <button onclick="addBlock('text')">📝 نص</button>
             </div>
             <div class="row">
                 <button onclick="addBlock('heading')">H عنوان</button>
+                <button onclick="addBlock('paragraph')">📝 فقرة</button>
+                <button onclick="addBlock('description')">📄 وصف</button>
+            </div>
+            <div class="row">
+                <button onclick="addBlock('divider')" title="إضافة خط فاصل">➖ خط</button>
+            </div>
+            <div class="row">
                 <button onclick="addPage()" style="background:#333; color:white;">📄 صفحة +</button>
             </div>
         </div>
@@ -128,8 +597,13 @@
         <div class="group" style="background:#fffde7;">
             <span class="group-title">حسابات وبيانات</span>
             <div class="row">
-                <button onclick="calcSum('alert')" class="calc-btn" title="يعرض مجموع الخلايا المحددة في رسالة">∑ مجموع المحدد</button>
-                <button onclick="calcSum('insert')" class="calc-btn" title="يدرج مجموع الخلايا المحددة في الخلية الأخيرة">📝 إدراج المجموع</button>
+                <button onclick="calcSum('alert')" class="calc-btn" title="يعرض مجموع الخلايا المحددة في رسالة">∑ مجموع</button>
+                <button onclick="calcSum('insert')" class="calc-btn" title="يدرج مجموع الخلايا المحددة">📝 إدراج المجموع</button>
+            </div>
+            <div class="row">
+                <button onclick="calcOperation('subtract')" class="calc-btn" title="طرح">➖ طرح</button>
+                <button onclick="calcOperation('multiply')" class="calc-btn" title="ضرب">✖️ ضرب</button>
+                <button onclick="calcOperation('divide')" class="calc-btn" title="قسمة">➗ قسمة</button>
             </div>
             <div class="row">
                 <button onclick="addTotalRow()" class="calc-btn" style="font-weight:bold;">➕ صف الإجمالي</button>
@@ -142,6 +616,10 @@
                 <button onclick="execTable('addrow')">➕ صف</button>
                 <button onclick="execTable('addcol')">➕ عمود</button>
                 <button onclick="autoNumber()" style="background:#e8f5e9;">🔢 ترقيم</button>
+            </div>
+            <div class="row">
+                <button onclick="execTable('delrow')" class="danger-btn" title="حذف الصف المحدد">➖ حذف صف</button>
+                <button onclick="execTable('delcol')" class="danger-btn" title="حذف العمود المحدد">➖ حذف عمود</button>
             </div>
             <div class="row">
                 <button onclick="removeNumbering()" class="danger-btn" title="حذف عمود الترقيم">🚫 حذف الترقيم</button>
@@ -172,11 +650,142 @@
                     <input type="color" onchange="applyColor('bg',this.value); document.getElementById('bp').style.background=this.value;">
                 </div>
                 <button onclick="document.execCommand('bold')"><b>B</b></button>
+                <button onclick="document.execCommand('italic')"><i>I</i></button>
+                <button onclick="document.execCommand('underline')"><u>U</u></button>
+            </div>
+            <div class="row">
+                <div class="font-size-control">
+                    <input type="number" id="fontSizeInput" min="8" max="72" value="14" onchange="applyFontSize(this.value)" style="width:50px;">
+                    <select id="fontSizeUnit" onchange="applyFontSize(document.getElementById('fontSizeInput').value)">
+                        <option value="px">px</option>
+                        <option value="pt">pt</option>
+                        <option value="em">em</option>
+                    </select>
+                    <button onclick="quickFontSize(12)">12</button>
+                    <button onclick="quickFontSize(16)">16</button>
+                    <button onclick="quickFontSize(20)">20</button>
+                </div>
             </div>
             <div class="row">
                 <button onclick="align('right')">➡️</button>
                 <button onclick="align('center')">⏺️</button>
                 <button onclick="align('left')">⬅️</button>
+            </div>
+        </div>
+        
+        <div class="group" style="background:#f3e5f5;">
+            <span class="group-title">تحكم في الصور</span>
+            <div class="row">
+                <button onclick="selectImage()" title="حدد صورة أولاً">🖼️ تحديد</button>
+                <button onclick="deleteSelectedImage()" class="danger-btn">🗑️ حذف</button>
+            </div>
+            <div class="row horizontal">
+                <button onclick="resizeImage(50)" title="تصغير">🔽</button>
+                <button onclick="resizeImage(100)" title="عادي">⏹️</button>
+                <button onclick="resizeImage(150)" title="تكبير">🔼</button>
+            </div>
+            <div class="row horizontal">
+                <button onclick="alignImage('left')">⬅️</button>
+                <button onclick="alignImage('center')">⏺️</button>
+                <button onclick="alignImage('right')">➡️</button>
+            </div>
+        </div>
+        
+        <div class="group" style="background:#e1f5fe;">
+            <span class="group-title">تحكم في المحتوى</span>
+            <div class="row">
+                <button onclick="showBorderControls()" title="تحكم في البوردر">🔲 بوردر</button>
+                <button onclick="togglePageMargins()" title="هوامش الصفحة">📐 هوامش</button>
+            </div>
+        </div>
+        
+        <div class="group" style="background:#e8f5e9;">
+            <span class="group-title">أدوات إضافية</span>
+            <div class="row">
+                <button onclick="document.execCommand('copy')" title="نسخ">📋 نسخ</button>
+                <button onclick="document.execCommand('paste')" title="لصق">📄 لصق</button>
+                <button onclick="document.execCommand('undo')" title="تراجع">↶ تراجع</button>
+                <button onclick="document.execCommand('redo')" title="إعادة">↷ إعادة</button>
+            </div>
+            <div class="row">
+                <button onclick="saveDocument()" class="primary-btn" title="حفظ">💾 حفظ</button>
+                <button onclick="loadDocument()" title="تحميل">📂 تحميل</button>
+            </div>
+            <div class="row">
+                <button onclick="clearPage()" class="danger-btn" title="مسح الصفحة">🗑️ مسح</button>
+                <button onclick="showHelp()" style="background:#2196F3; color:white;" title="توضيح آلية العمل">❓ مساعدة</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة المساعدة -->
+    <div class="help-modal" id="helpModal">
+        <div class="help-content">
+            <h2>📖 دليل استخدام المحرر</h2>
+            <button onclick="closeHelp()" style="position:absolute; top:10px; left:10px; background:#d32f2f; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">✕ إغلاق</button>
+            
+            <div class="help-section">
+                <h3>🎯 الجداول</h3>
+                <ul>
+                    <li><strong>إضافة جدول:</strong> اضغط زر "جدول" لإضافة جدول جديد</li>
+                    <li><strong>تحريك الجدول:</strong> اضغط واسحب الجدول لتحريكه في الصفحة</li>
+                    <li><strong>تحديد خلايا:</strong> اضغط Ctrl + نقر لتحديد خلايا متعددة</li>
+                    <li><strong>العمليات الحسابية:</strong> حدد الخلايا ثم استخدم الأزرار (جمع، طرح، ضرب، قسمة)</li>
+                    <li><strong>إضافة صف/عمود:</strong> استخدم الأزرار في قسم "ترقيم وهيكلة"</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>🖼️ الصور</h3>
+                <ul>
+                    <li><strong>إضافة صورة:</strong> اضغط زر "صورة" واختر الصفحة المطلوبة</li>
+                    <li><strong>تحريك الصورة:</strong> اضغط واسحب الصورة مباشرة</li>
+                    <li><strong>تغيير الحجم:</strong> اسحب المقابض في الزوايا أو استخدم الأزرار (صغير/عادي/كبير)</li>
+                    <li><strong>التحكم بالكيبورد:</strong> استخدم الأسهم لتحريك الصورة (Shift للخطوات الكبيرة)</li>
+                    <li><strong>المحاذاة:</strong> استخدم أزرار المحاذاة (يسار/وسط/يمين)</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>📝 النصوص والمحتوى</h3>
+                <ul>
+                    <li><strong>إضافة عنوان:</strong> اضغط زر "H عنوان"</li>
+                    <li><strong>إضافة فقرة:</strong> اضغط زر "📝 فقرة"</li>
+                    <li><strong>إضافة وصف:</strong> اضغط زر "📄 وصف"</li>
+                    <li><strong>إضافة خط:</strong> اضغط زر "➖ خط" لإضافة خط فاصل</li>
+                    <li><strong>تحريك النصوص:</strong> اضغط واسحب أي نص (عنوان، فقرة، وصف) لتحريكه</li>
+                    <li><strong>حذف المحتوى:</strong> اضغط زر X الذي يظهر عند التمرير أو انقر نقراً مزدوجاً</li>
+                    <li><strong>البوردر:</strong> حدد النص ثم اضغط "🔲 بوردر" للتحكم في البوردر</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>📐 الهوامش والبوردر</h3>
+                <ul>
+                    <li><strong>هوامش الصفحة:</strong> اضغط "📐 هوامش" للتحكم في هوامش جميع الصفحات</li>
+                    <li><strong>بوردر المحتوى:</strong> حدد أي نص ثم اضغط "🔲 بوردر" للتحكم في نوع البوردر، السمك، واللون</li>
+                    <li><strong>أنواع البوردر:</strong> خط، متقطع، نقط، مزدوج، أو بدون</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>🔢 العمليات الحسابية</h3>
+                <ul>
+                    <li><strong>الجمع:</strong> حدد الخلايا واضغط "∑ مجموع"</li>
+                    <li><strong>الطرح:</strong> حدد الخلايا واضغط "➖ طرح"</li>
+                    <li><strong>الضرب:</strong> حدد الخلايا واضغط "✖️ ضرب"</li>
+                    <li><strong>القسمة:</strong> حدد الخلايا واضغط "➗ قسمة"</li>
+                    <li><strong>إدراج الناتج:</strong> انقر على خلية ثم استخدم "📝 إدراج المجموع"</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>💾 الحفظ والتحميل</h3>
+                <ul>
+                    <li><strong>حفظ:</strong> اضغط "💾 حفظ" لحفظ المستند كملف JSON</li>
+                    <li><strong>تحميل:</strong> اضغط "📂 تحميل" لتحميل ملف محفوظ مسبقاً</li>
+                    <li><strong>الطباعة:</strong> اضغط زر "🖨️ طباعة" في رأس الصفحة</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -186,11 +795,18 @@
         <div class="page-container" id="page1">
             <div class="page-header">
                 <span>صفحة 1</span>
-                <button onclick="printThisPage('page1')" class="primary-btn" style="padding:2px 8px; font-size:11px;">🖨️ طباعة</button>
+                <div style="display:flex; gap:5px;">
+                    <button onclick="printThisPage('page1')" class="primary-btn" style="padding:2px 8px; font-size:11px;">🖨️ طباعة</button>
+                    <button onclick="deletePage('page1')" class="danger-btn" style="padding:2px 8px; font-size:11px;" title="حذف الصفحة">🗑️ حذف</button>
+                </div>
             </div>
             <div class="a4-page">
-                <div class="editable-block" contenteditable="true" style="text-align:center; padding:20px; color:#888;">
-                    <p>ابدأ العمل هنا...</p>
+                <div class="page-content">
+                    <!-- الصفحة جاهزة للعمل -->
+                </div>
+                <div class="page-footer">
+                    <div class="company-name">Sigma Shoes EG</div>
+                    <div class="print-date" id="printDate1"></div>
                 </div>
             </div>
         </div>
@@ -203,10 +819,51 @@
         let selectedCells = [];
         let activeTable = null;
         let lastClickedCell = null; // لتحديد أين نكتب المجموع
+        let selectedImage = null; // الصورة المحددة
+        let selectedBlock = null; // المحتوى المحدد
+        let isDragging = false; // حالة السحب
+        let dragOffset = { x: 0, y: 0 }; // إزاحة السحب
 
         document.addEventListener('click', function(e) {
+            // منع الإغلاق عند النقر على زر X
+            if (e.target.classList.contains('mini-btn') || e.target.closest('.mini-btn')) {
+                e.stopPropagation();
+                return;
+            }
+            
+            // التحقق من النقر على صورة
+            const imgWrapper = e.target.closest('.resizable-img-wrapper');
+            if (imgWrapper && !e.target.closest('.img-controls') && !e.target.closest('.img-margin-controls')) {
+                document.querySelectorAll('.selected-img').forEach(img => img.classList.remove('selected-img'));
+                imgWrapper.classList.add('selected-img');
+                selectedImage = imgWrapper;
+                // إلغاء تحديد المحتوى الآخر
+                document.querySelectorAll('.selected-block').forEach(block => block.classList.remove('selected-block'));
+                selectedBlock = null;
+                return;
+            }
+            
+            // التحقق من النقر على محتوى قابل للتعديل
+            const block = e.target.closest('.editable-block');
+            if (block && !e.target.closest('.resizable-img-wrapper')) {
+                document.querySelectorAll('.selected-block').forEach(b => b.classList.remove('selected-block'));
+                block.classList.add('selected-block');
+                selectedBlock = block;
+                // إلغاء تحديد الصور
+                document.querySelectorAll('.selected-img').forEach(img => img.classList.remove('selected-img'));
+                selectedImage = null;
+            }
+            
+            // التحقق من النقر على خلية
             const cell = e.target.closest('td, th');
-            if (!cell) return;
+            if (!cell) {
+                // إلغاء تحديد الصور عند النقر خارجها
+                if (!e.target.closest('.resizable-img-wrapper') && !e.target.closest('.img-controls') && !e.target.closest('.img-margin-controls')) {
+                    document.querySelectorAll('.selected-img').forEach(img => img.classList.remove('selected-img'));
+                    selectedImage = null;
+                }
+                return;
+            }
             
             activeTable = cell.closest('table');
             lastClickedCell = cell;
@@ -223,6 +880,316 @@
                 document.querySelectorAll('.selected').forEach(c => c.classList.remove('selected'));
                 selectedCells = [cell];
                 cell.classList.add('selected');
+            }
+        });
+        
+        // ===============================================
+        // Drag & Drop للصور (محسّن)
+        // ===============================================
+        document.addEventListener('mousedown', function(e) {
+            // التحقق من الصور - فقط عند النقر مباشرة على الصورة (وليس على أدوات التحكم)
+            const imgWrapper = e.target.closest('.resizable-img-wrapper');
+            if (imgWrapper) {
+                // منع السحب إذا كان النقر على أدوات التحكم أو المقابض
+                if (e.target.closest('.img-handle') || 
+                    e.target.closest('.img-controls') || 
+                    e.target.closest('.img-margin-controls') ||
+                    e.target.tagName === 'INPUT') {
+                    return;
+                }
+                
+                // السماح بالسحب فقط عند النقر مباشرة على الصورة
+                if (e.target.tagName === 'IMG' || e.target === imgWrapper) {
+                    isDragging = true;
+                    const rect = imgWrapper.getBoundingClientRect();
+                    const pageRect = imgWrapper.closest('.a4-page').getBoundingClientRect();
+                    
+                    dragOffset.x = e.clientX - rect.left;
+                    dragOffset.y = e.clientY - rect.top;
+                    
+                    imgWrapper.classList.add('dragging');
+                    imgWrapper.style.cursor = 'grabbing';
+                    
+                    // إخفاء أدوات التحكم أثناء السحب
+                    const controls = imgWrapper.querySelector('.img-controls');
+                    const margins = imgWrapper.querySelector('.img-margin-controls');
+                    if(controls) controls.style.display = 'none';
+                    if(margins) margins.style.display = 'none';
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+            }
+            
+            // Drag & Drop للجداول
+            const tableBlock = e.target.closest('.draggable-table');
+            if (tableBlock && !e.target.closest('td, th') && !e.target.closest('.block-tools') && !e.target.closest('.border-controls')) {
+                isDragging = true;
+                const rect = tableBlock.getBoundingClientRect();
+                const pageRect = tableBlock.closest('.a4-page').getBoundingClientRect();
+                
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                
+                tableBlock.classList.add('dragging');
+                tableBlock.style.cursor = 'grabbing';
+                
+                e.preventDefault();
+            }
+            
+            // Drag & Drop للنصوص
+            const textBlock = e.target.closest('.draggable-text');
+            if (textBlock && !e.target.closest('.block-tools') && !e.target.closest('.border-controls')) {
+                // منع السحب إذا كان المستخدم يحرر النص
+                if (document.activeElement === e.target || textBlock.querySelector(':focus')) {
+                    return;
+                }
+                
+                isDragging = true;
+                const rect = textBlock.getBoundingClientRect();
+                const pageRect = textBlock.closest('.a4-page').getBoundingClientRect();
+                
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                
+                textBlock.classList.add('dragging');
+                textBlock.style.cursor = 'grabbing';
+                
+                e.preventDefault();
+            }
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            
+            // تحريك الصور
+            if (selectedImage) {
+                const page = selectedImage.closest('.a4-page');
+                if (!page) return;
+                
+                const pageRect = page.getBoundingClientRect();
+                const newX = e.clientX - pageRect.left - dragOffset.x;
+                const newY = e.clientY - pageRect.top - dragOffset.y;
+                
+                // التأكد من أن الصورة داخل حدود الصفحة
+                const imgWidth = selectedImage.offsetWidth;
+                const imgHeight = selectedImage.offsetHeight;
+                const maxX = page.offsetWidth - imgWidth;
+                const maxY = page.offsetHeight - imgHeight;
+                
+                selectedImage.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+                selectedImage.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+            }
+            
+            // تحريك الجداول
+            const draggingTable = document.querySelector('.draggable-table.dragging');
+            if (draggingTable) {
+                const page = draggingTable.closest('.a4-page');
+                if (!page) return;
+                
+                const pageRect = page.getBoundingClientRect();
+                const newX = e.clientX - pageRect.left - dragOffset.x;
+                const newY = e.clientY - pageRect.top - dragOffset.y;
+                
+                const tableWidth = draggingTable.offsetWidth;
+                const tableHeight = draggingTable.offsetHeight;
+                const maxX = page.offsetWidth - tableWidth;
+                const maxY = page.offsetHeight - tableHeight;
+                
+                draggingTable.style.position = 'absolute';
+                draggingTable.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+                draggingTable.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+            }
+            
+            // تحريك النصوص
+            const draggingText = document.querySelector('.draggable-text.dragging');
+            if (draggingText) {
+                const page = draggingText.closest('.a4-page');
+                if (!page) return;
+                
+                const pageRect = page.getBoundingClientRect();
+                const newX = e.clientX - pageRect.left - dragOffset.x;
+                const newY = e.clientY - pageRect.top - dragOffset.y;
+                
+                const textWidth = draggingText.offsetWidth;
+                const textHeight = draggingText.offsetHeight;
+                const maxX = page.offsetWidth - textWidth;
+                const maxY = page.offsetHeight - textHeight;
+                
+                draggingText.style.position = 'absolute';
+                draggingText.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+                draggingText.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+            }
+        });
+        
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                if (selectedImage) {
+                    selectedImage.classList.remove('dragging');
+                    selectedImage.style.cursor = 'move';
+                }
+                const draggingTable = document.querySelector('.draggable-table.dragging');
+                if (draggingTable) {
+                    draggingTable.classList.remove('dragging');
+                    draggingTable.style.cursor = 'move';
+                }
+                const draggingText = document.querySelector('.draggable-text.dragging');
+                if (draggingText) {
+                    draggingText.classList.remove('dragging');
+                    draggingText.style.cursor = 'move';
+                }
+            }
+            isDragging = false;
+        });
+        
+        // ===============================================
+        // التحكم بالكيبورد (أسهم) لتحريك الصور
+        // ===============================================
+        document.addEventListener('keydown', function(e) {
+            if (!selectedImage) return;
+            
+            const step = e.shiftKey ? 10 : 1; // Shift للتحرك بخطوات أكبر
+            const page = selectedImage.closest('.a4-page');
+            if (!page) return;
+            
+            let currentLeft = parseInt(selectedImage.style.left) || 0;
+            let currentTop = parseInt(selectedImage.style.top) || 0;
+            const imgWidth = selectedImage.offsetWidth;
+            const imgHeight = selectedImage.offsetHeight;
+            const maxX = page.offsetWidth - imgWidth;
+            const maxY = page.offsetHeight - imgHeight;
+            
+            switch(e.key) {
+                case 'ArrowRight':
+                    e.preventDefault();
+                    currentLeft = Math.min(currentLeft + step, maxX);
+                    selectedImage.style.left = currentLeft + 'px';
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    currentLeft = Math.max(currentLeft - step, 0);
+                    selectedImage.style.left = currentLeft + 'px';
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    currentTop = Math.min(currentTop + step, maxY);
+                    selectedImage.style.top = currentTop + 'px';
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    currentTop = Math.max(currentTop - step, 0);
+                    selectedImage.style.top = currentTop + 'px';
+                    break;
+                case 'Delete':
+                case 'Backspace':
+                    if (selectedImage && !e.target.contentEditable) {
+                        e.preventDefault();
+                        deleteSelectedImage();
+                    }
+                    break;
+            }
+        });
+        
+        // ===============================================
+        // Drag & Drop من الملفات
+        // ===============================================
+        document.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const page = e.target.closest('.a4-page');
+            if (page) {
+                page.classList.add('drag-over');
+            }
+        });
+        
+        document.addEventListener('dragleave', function(e) {
+            const page = e.target.closest('.a4-page');
+            if (page) {
+                page.classList.remove('drag-over');
+            }
+        });
+        
+        document.addEventListener('drop', function(e) {
+            e.preventDefault();
+            const page = e.target.closest('.a4-page');
+            if (page) {
+                page.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    Array.from(files).forEach(file => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function(event) {
+                                const d = document.createElement('div');
+                                d.className = 'editable-block';
+                                d.style.textAlign = 'center';
+                                d.style.position = 'relative';
+                                
+                                const rect = page.getBoundingClientRect();
+                                const x = e.clientX - rect.left;
+                                const y = e.clientY - rect.top;
+                                
+                                d.innerHTML = `<div class="block-tools"><button class="mini-btn danger-btn" onclick="deleteBlock(this)">X</button></div>
+                                    <div class="resizable-img-wrapper selected-img" style="left:${x}px; top:${y}px; width:200px;">
+                                        <img src="${event.target.result}">
+                                        <div class="img-handle bottom-right"></div>
+                                        <div class="img-handle bottom-left"></div>
+                                        <div class="img-handle top-right"></div>
+                                        <div class="img-handle top-left"></div>
+                                        <div class="img-controls">
+                                            <button onclick="resizeImage(50)" title="تصغير">🔽</button>
+                                            <button onclick="resizeImage(100)" title="عادي">⏹️</button>
+                                            <button onclick="resizeImage(150)" title="تكبير">🔼</button>
+                                            <button onclick="alignImage('left')">⬅️</button>
+                                            <button onclick="alignImage('center')">⏺️</button>
+                                            <button onclick="alignImage('right')">➡️</button>
+                                            <button class="danger-btn" onclick="deleteBlock(this)">🗑️</button>
+                                        </div>
+                                        <div class="img-margin-controls">
+                                            <div class="margin-input-group">
+                                                <label>هامش علوي:</label>
+                                                <input type="number" id="marginTop" value="0" min="0" onchange="applyImageMargin('top', this.value)">
+                                            </div>
+                                            <div class="margin-input-group">
+                                                <label>هامش سفلي:</label>
+                                                <input type="number" id="marginBottom" value="0" min="0" onchange="applyImageMargin('bottom', this.value)">
+                                            </div>
+                                            <div class="margin-input-group">
+                                                <label>هامش أيمن:</label>
+                                                <input type="number" id="marginRight" value="0" min="0" onchange="applyImageMargin('right', this.value)">
+                                            </div>
+                                            <div class="margin-input-group">
+                                                <label>هامش أيسر:</label>
+                                                <input type="number" id="marginLeft" value="0" min="0" onchange="applyImageMargin('left', this.value)">
+                                            </div>
+                                            <div class="margin-input-group">
+                                                <label>Padding علوي:</label>
+                                                <input type="number" id="paddingTop" value="0" min="0" onchange="applyImagePadding('top', this.value)">
+                                            </div>
+                                            <div class="margin-input-group">
+                                                <label>Padding سفلي:</label>
+                                                <input type="number" id="paddingBottom" value="0" min="0" onchange="applyImagePadding('bottom', this.value)">
+                                            </div>
+                                            <div class="margin-input-group">
+                                                <label>Padding أيمن:</label>
+                                                <input type="number" id="paddingRight" value="0" min="0" onchange="applyImagePadding('right', this.value)">
+                                            </div>
+                                            <div class="margin-input-group">
+                                                <label>Padding أيسر:</label>
+                                                <input type="number" id="paddingLeft" value="0" min="0" onchange="applyImagePadding('left', this.value)">
+                                            </div>
+                                        </div>
+                                    </div>`;
+                                page.appendChild(d);
+                                
+                                const wrapper = d.querySelector('.resizable-img-wrapper');
+                                selectedImage = wrapper;
+                                setupImageHandlers(wrapper);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                }
             }
         });
 
@@ -260,6 +1227,53 @@
                 } else {
                     alert('انقر على الخلية التي تريد وضع الناتج فيها أولاً.');
                 }
+            }
+        }
+        
+        // العمليات الحسابية الأخرى (طرح، ضرب، قسمة)
+        function calcOperation(operation) {
+            if (selectedCells.length < 2) return alert('حدد خليتين على الأقل لإجراء العملية.');
+            
+            const values = [];
+            selectedCells.forEach(c => {
+                const text = c.innerText.replace(/[^\d.-]/g, '');
+                const val = parseFloat(text);
+                if (!isNaN(val)) {
+                    values.push(val);
+                }
+            });
+            
+            if (values.length < 2) return alert('يجب أن تحتوي الخلايا المحددة على أرقام صحيحة.');
+            
+            let result;
+            switch(operation) {
+                case 'subtract':
+                    result = values[0];
+                    for(let i = 1; i < values.length; i++) {
+                        result -= values[i];
+                    }
+                    break;
+                case 'multiply':
+                    result = values[0];
+                    for(let i = 1; i < values.length; i++) {
+                        result *= values[i];
+                    }
+                    break;
+                case 'divide':
+                    result = values[0];
+                    for(let i = 1; i < values.length; i++) {
+                        if(values[i] === 0) return alert('لا يمكن القسمة على صفر!');
+                        result /= values[i];
+                    }
+                    break;
+            }
+            
+            if (lastClickedCell) {
+                lastClickedCell.innerText = result.toFixed(2);
+                lastClickedCell.style.fontWeight = 'bold';
+                lastClickedCell.style.backgroundColor = '#e8f5e9';
+            } else {
+                alert(`الناتج: ${result.toFixed(2)}`);
             }
         }
 
@@ -392,18 +1406,67 @@
         // ===============================================
         function addBlock(type) {
             const p = document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length-1];
+            const pageContent = p.querySelector('.page-content') || p;
             const d = document.createElement('div'); d.className='editable-block';
-            d.innerHTML = `<div class="block-tools"><button class="mini-btn danger-btn" onclick="this.closest('.editable-block').remove()">X</button></div>`;
-            if(type==='table') createResizableTable(d);
-            else if(type==='heading') d.innerHTML+=`<h1 contenteditable="true" style="text-align:center;">عنوان</h1>`;
-            else d.innerHTML+=`<div contenteditable="true" style="padding:5px"><p>نص...</p></div>`;
-            p.appendChild(d); d.scrollIntoView({behavior:'smooth'});
+            d.innerHTML = `<div class="block-tools"><button class="mini-btn danger-btn" onclick="deleteBlock(this)">X</button></div>`;
+            if(type==='table') {
+                createResizableTable(d);
+                d.classList.add('draggable-table');
+            } else if(type==='heading') {
+                d.innerHTML+=`<h1 contenteditable="true" style="text-align:center; margin:10px 0;" onclick="deleteTextBlock(this, event)">عنوان</h1>`;
+                d.classList.add('deletable-text', 'draggable-text');
+            } else if(type==='paragraph') {
+                d.innerHTML+=`<p contenteditable="true" style="padding:10px; margin:5px 0; line-height:1.6;" onclick="deleteTextBlock(this, event)">فقرة نصية...</p>`;
+                d.classList.add('deletable-text', 'draggable-text');
+            } else if(type==='description') {
+                d.innerHTML+=`<div contenteditable="true" style="padding:15px; margin:10px 0; background:#f9f9f9; border-right:3px solid var(--primary); line-height:1.8;" onclick="deleteTextBlock(this, event)">وصف تفصيلي...</div>`;
+                d.classList.add('deletable-text', 'draggable-text');
+            } else if(type==='divider') {
+                d.innerHTML+=`<hr class="divider-line" onclick="deleteBlock(this.closest('.editable-block'))">`;
+                d.style.cursor = 'pointer';
+            } else {
+                d.innerHTML+=`<div contenteditable="true" style="padding:5px" onclick="deleteTextBlock(this, event)"><p>نص...</p></div>`;
+                d.classList.add('deletable-text', 'draggable-text');
+            }
+            
+            // إضافة أدوات التحكم في البوردر
+            if(type !== 'table' && type !== 'divider') {
+                d.innerHTML += `<div class="border-controls">
+                    <div class="border-input-group">
+                        <label>نوع البوردر:</label>
+                        <select onchange="applyBorder('style', this.value)">
+                            <option value="none">بدون</option>
+                            <option value="solid">خط</option>
+                            <option value="dashed">متقطع</option>
+                            <option value="dotted">نقط</option>
+                            <option value="double">مزدوج</option>
+                        </select>
+                    </div>
+                    <div class="border-input-group">
+                        <label>سمك:</label>
+                        <input type="number" min="0" max="20" value="1" onchange="applyBorder('width', this.value + 'px')">
+                    </div>
+                    <div class="border-input-group">
+                        <label>لون:</label>
+                        <input type="color" value="#000000" onchange="applyBorder('color', this.value)">
+                    </div>
+                </div>`;
+            }
+            pageContent.appendChild(d);
+            // إصلاح السكرول - استخدام scrollIntoView مع خيارات أفضل
+            setTimeout(() => {
+                d.scrollIntoView({behavior:'smooth', block:'nearest', inline:'nearest'});
+            }, 100);
         }
 
         function createResizableTable(c) {
             const t = document.createElement('table');
             t.innerHTML = `<thead><tr><th style="width:50px">م</th><th>البيان</th><th>السعر</th></tr></thead><tbody><tr><td>1</td><td></td><td></td></tr></tbody>`;
-            t.querySelectorAll('td, th').forEach(c=>c.contentEditable=true); c.appendChild(t); initResizers(t);
+            t.querySelectorAll('td, th').forEach(cell=>cell.contentEditable=true); 
+            c.appendChild(t); 
+            initResizers(t);
+            // جعل الجدول قابل للسحب
+            c.classList.add('draggable-table');
         }
         function initResizers(t) {
             t.querySelectorAll('th').forEach(th=>{
@@ -415,32 +1478,722 @@
         }
         function execTable(a) {
             if(!activeTable) return alert('حدد جدولاً');
-            if(a==='addrow') { let r=activeTable.insertRow(-1); for(let i=0;i<activeTable.rows[0].cells.length;i++){let c=r.insertCell(); c.contentEditable=true; c.style.border='1px solid #999';} }
-            if(a==='addcol') { for(let r of activeTable.rows){let c=r.insertCell(-1); c.contentEditable=true; c.style.border='1px solid #999'; if(r.rowIndex===0){c.outerHTML='<th>جديد</th>'; setTimeout(()=>initResizers(activeTable),50);}} }
-            if(a==='delrow' && selectedCells.length) selectedCells[0].parentElement.remove();
-            if(a==='delcol' && selectedCells.length) { let idx=selectedCells[0].cellIndex; for(let r of activeTable.rows) if(r.cells[idx]) r.deleteCell(idx); }
+            if(a==='addrow') { 
+                let r=activeTable.insertRow(-1); 
+                for(let i=0;i<activeTable.rows[0].cells.length;i++){
+                    let c=r.insertCell(); 
+                    c.contentEditable=true; 
+                    c.style.border='1px solid #999';
+                } 
+            }
+            if(a==='addcol') { 
+                for(let r of activeTable.rows){
+                    let c=r.insertCell(-1); 
+                    c.contentEditable=true; 
+                    c.style.border='1px solid #999'; 
+                    if(r.rowIndex===0){
+                        c.outerHTML='<th>جديد</th>'; 
+                        setTimeout(()=>initResizers(activeTable),50);
+                    }
+                } 
+            }
+            if(a==='delrow') {
+                if(selectedCells.length > 0) {
+                    const row = selectedCells[0].parentElement;
+                    if(row.rowIndex === 0) return alert('لا يمكن حذف صف العناوين');
+                    if(confirm('هل تريد حذف هذا الصف؟')) row.remove();
+                } else {
+                    alert('حدد خلية في الصف الذي تريد حذفه');
+                }
+            }
+            if(a==='delcol') {
+                if(selectedCells.length > 0) {
+                    const idx = selectedCells[0].cellIndex;
+                    if(activeTable.rows[0].cells.length <= 1) return alert('لا يمكن حذف العمود الأخير');
+                    if(confirm('هل تريد حذف هذا العمود؟')) {
+                        for(let r of activeTable.rows) {
+                            if(r.cells[idx]) r.deleteCell(idx);
+                        }
+                        setTimeout(()=>initResizers(activeTable),50);
+                    }
+                } else {
+                    alert('حدد خلية في العمود الذي تريد حذفه');
+                }
+            }
         }
         function deleteFullTable() { if(activeTable && confirm('حذف الجدول؟')) activeTable.closest('.editable-block').remove(); }
         
+        // ===============================================
+        // التحكم في حجم الخط
+        // ===============================================
+        function applyFontSize(size) {
+            const unit = document.getElementById('fontSizeUnit').value;
+            const fontSize = size + unit;
+            
+            if(selectedCells.length > 0) {
+                // تطبيق على الخلايا المحددة
+                selectedCells.forEach(cell => {
+                    cell.style.fontSize = fontSize;
+                });
+            } else {
+                // تطبيق على النص المحدد
+                const selection = window.getSelection();
+                if(selection.rangeCount > 0 && !selection.isCollapsed) {
+                    const range = selection.getRangeAt(0);
+                    const span = document.createElement('span');
+                    span.style.fontSize = fontSize;
+                    try {
+                        range.surroundContents(span);
+                    } catch(e) {
+                        // إذا فشل surroundContents، نستخدم طريقة بديلة
+                        const contents = range.extractContents();
+                        span.appendChild(contents);
+                        range.insertNode(span);
+                    }
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                } else {
+                    // إذا لم يكن هناك نص محدد، نطبق على العنصر الحالي
+                    const activeElement = document.activeElement;
+                    if(activeElement && (activeElement.contentEditable === 'true' || activeElement.tagName === 'TD' || activeElement.tagName === 'TH')) {
+                        activeElement.style.fontSize = fontSize;
+                    } else {
+                        // تطبيق على كل النص في contenteditable
+                        document.execCommand('fontSize', false, '7');
+                        const spans = document.querySelectorAll('font[size="7"]');
+                        spans.forEach(span => {
+                            const fontSize = document.getElementById('fontSizeInput').value + document.getElementById('fontSizeUnit').value;
+                            span.style.fontSize = fontSize;
+                        });
+                    }
+                }
+            }
+        }
+        
+        function quickFontSize(size) {
+            document.getElementById('fontSizeInput').value = size;
+            applyFontSize(size);
+        }
+
+        // ===============================================
+        // التحكم في الصور
+        // ===============================================
+        function selectImage() {
+            if(!selectedImage) {
+                const images = document.querySelectorAll('.resizable-img-wrapper');
+                if(images.length === 0) return alert('لا توجد صور في الصفحة');
+                if(images.length === 1) {
+                    selectedImage = images[0];
+                    images[0].classList.add('selected-img');
+                } else {
+                    alert('انقر على الصورة التي تريد تحديدها');
+                }
+            }
+        }
+        
+        function deleteSelectedImage() {
+            if(selectedImage) {
+                if(confirm('هل تريد حذف هذه الصورة؟')) {
+                    selectedImage.closest('.editable-block').remove();
+                    selectedImage = null;
+                }
+            } else {
+                alert('حدد صورة أولاً');
+            }
+        }
+        
+        function resizeImage(percent) {
+            if(!selectedImage) return alert('حدد صورة أولاً');
+            const img = selectedImage.querySelector('img');
+            if(!img) return;
+            
+            const currentWidth = parseInt(getComputedStyle(selectedImage).width) || img.naturalWidth;
+            const newWidth = (currentWidth * percent) / 100;
+            selectedImage.style.width = newWidth + 'px';
+        }
+        
+        function alignImage(align) {
+            if(!selectedImage) return alert('حدد صورة أولاً');
+            const block = selectedImage.closest('.editable-block');
+            if(block) {
+                block.style.textAlign = align;
+            }
+        }
+        
+        // ===============================================
+        // الهوامش الداخلية والخارجية للصور
+        // ===============================================
+        function showImageMargins() {
+            if(!selectedImage) return alert('حدد صورة أولاً');
+            const controls = selectedImage.querySelector('.img-margin-controls');
+            const imgControls = selectedImage.querySelector('.img-controls');
+            if(controls) {
+                const isVisible = controls.style.display === 'flex';
+                controls.style.display = isVisible ? 'none' : 'flex';
+                // إخفاء أدوات التحكم الأخرى عند إظهار الهوامش
+                if(!isVisible && imgControls) {
+                    imgControls.style.display = 'none';
+                }
+            }
+        }
+        
+        // ===============================================
+        // Toggle Sidebar
+        // ===============================================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+        
+        // ===============================================
+        // تحكم في البوردر
+        // ===============================================
+        function showBorderControls() {
+            if(!selectedBlock) {
+                alert('حدد محتوى أولاً (نص، عنوان، فقرة)');
+                return;
+            }
+            const borderControls = selectedBlock.querySelector('.border-controls');
+            if(borderControls) {
+                borderControls.style.display = borderControls.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+        
+        function applyBorder(property, value) {
+            if(!selectedBlock) return;
+            
+            if(property === 'style') {
+                selectedBlock.style.borderStyle = value;
+                if(value === 'none') {
+                    selectedBlock.style.border = 'none';
+                }
+            } else if(property === 'width') {
+                selectedBlock.style.borderWidth = value;
+            } else if(property === 'color') {
+                selectedBlock.style.borderColor = value;
+            }
+            
+            // التأكد من وجود بوردر
+            if(selectedBlock.style.borderStyle !== 'none') {
+                if(!selectedBlock.style.borderWidth) selectedBlock.style.borderWidth = '1px';
+                if(!selectedBlock.style.borderColor) selectedBlock.style.borderColor = '#000';
+            }
+        }
+        
+        // ===============================================
+        // تحكم في هوامش الصفحة
+        // ===============================================
+        function togglePageMargins() {
+            let marginControls = document.querySelector('.page-margin-controls');
+            if(!marginControls) {
+                // إنشاء أدوات التحكم
+                marginControls = document.createElement('div');
+                marginControls.className = 'page-margin-controls';
+                marginControls.innerHTML = `
+                    <h3>هوامش الصفحة</h3>
+                    <div class="margin-control-group">
+                        <label>علوي:</label>
+                        <input type="number" id="pageMarginTop" value="20" min="0" max="50">
+                    </div>
+                    <div class="margin-control-group">
+                        <label>سفلي:</label>
+                        <input type="number" id="pageMarginBottom" value="20" min="0" max="50">
+                    </div>
+                    <div class="margin-control-group">
+                        <label>أيمن:</label>
+                        <input type="number" id="pageMarginRight" value="20" min="0" max="50">
+                    </div>
+                    <div class="margin-control-group">
+                        <label>أيسر:</label>
+                        <input type="number" id="pageMarginLeft" value="20" min="0" max="50">
+                    </div>
+                    <button onclick="applyPageMargins()" class="primary-btn">تطبيق</button>
+                    <button onclick="togglePageMargins()" class="danger-btn">إغلاق</button>
+                `;
+                document.body.appendChild(marginControls);
+            }
+            
+            marginControls.classList.toggle('active');
+        }
+        
+        function applyPageMargins() {
+            const top = document.getElementById('pageMarginTop').value || 20;
+            const bottom = document.getElementById('pageMarginBottom').value || 20;
+            const right = document.getElementById('pageMarginRight').value || 20;
+            const left = document.getElementById('pageMarginLeft').value || 20;
+            
+            document.querySelectorAll('.a4-page').forEach(page => {
+                page.style.paddingTop = top + 'mm';
+                page.style.paddingBottom = bottom + 'mm';
+                page.style.paddingRight = right + 'mm';
+                page.style.paddingLeft = left + 'mm';
+            });
+            
+            alert('تم تطبيق الهوامش على جميع الصفحات');
+        }
+        
+        // ===============================================
+        // نافذة المساعدة
+        // ===============================================
+        function showHelp() {
+            document.getElementById('helpModal').classList.add('active');
+        }
+        
+        function closeHelp() {
+            document.getElementById('helpModal').classList.remove('active');
+        }
+        
+        // إغلاق النافذة عند النقر خارجها
+        const helpModal = document.getElementById('helpModal');
+        if(helpModal) {
+            helpModal.addEventListener('click', function(e) {
+                if(e.target === this) {
+                    closeHelp();
+                }
+            });
+        }
+        
+        function applyImageMargin(side, value) {
+            if(!selectedImage) return;
+            selectedImage.style.margin = '';
+            const currentMargins = {
+                top: parseInt(selectedImage.style.marginTop) || 0,
+                right: parseInt(selectedImage.style.marginRight) || 0,
+                bottom: parseInt(selectedImage.style.marginBottom) || 0,
+                left: parseInt(selectedImage.style.marginLeft) || 0
+            };
+            currentMargins[side] = parseInt(value) || 0;
+            selectedImage.style.marginTop = currentMargins.top + 'px';
+            selectedImage.style.marginRight = currentMargins.right + 'px';
+            selectedImage.style.marginBottom = currentMargins.bottom + 'px';
+            selectedImage.style.marginLeft = currentMargins.left + 'px';
+        }
+        
+        function applyImagePadding(side, value) {
+            if(!selectedImage) return;
+            const img = selectedImage.querySelector('img');
+            if(!img) return;
+            img.style.padding = '';
+            const currentPadding = {
+                top: parseInt(img.style.paddingTop) || 0,
+                right: parseInt(img.style.paddingRight) || 0,
+                bottom: parseInt(img.style.paddingBottom) || 0,
+                left: parseInt(img.style.paddingLeft) || 0
+            };
+            currentPadding[side] = parseInt(value) || 0;
+            img.style.paddingTop = currentPadding.top + 'px';
+            img.style.paddingRight = currentPadding.right + 'px';
+            img.style.paddingBottom = currentPadding.bottom + 'px';
+            img.style.paddingLeft = currentPadding.left + 'px';
+        }
+        
+        // ===============================================
+        // حذف المحتوى (تحسين زر X)
+        // ===============================================
+        function deleteBlock(btn) {
+            const block = btn.closest('.editable-block');
+            if(block && confirm('هل تريد حذف هذا المحتوى؟')) {
+                if(selectedImage && selectedImage.closest('.editable-block') === block) {
+                    selectedImage = null;
+                }
+                if(selectedBlock === block) {
+                    selectedBlock = null;
+                }
+                block.remove();
+            }
+        }
+        
+        // ===============================================
+        // حفظ وتحميل المستند
+        // ===============================================
+        function saveDocument() {
+            const workspace = document.getElementById('workspace');
+            const data = {
+                html: workspace.innerHTML,
+                timestamp: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document_' + new Date().getTime() + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('تم الحفظ بنجاح!');
+        }
+        
+        function loadDocument() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if(!file) return;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if(data.html) {
+                            if(confirm('سيتم استبدال المحتوى الحالي. هل تريد المتابعة؟')) {
+                                document.getElementById('workspace').innerHTML = data.html;
+                                // إعادة تهيئة الصور
+                                document.querySelectorAll('.resizable-img-wrapper').forEach(wrapper => {
+                                    setupImageHandlers(wrapper);
+                                });
+                                alert('تم التحميل بنجاح!');
+                            }
+                        } else {
+                            alert('ملف غير صالح');
+                        }
+                    } catch(err) {
+                        alert('خطأ في قراءة الملف: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+        
+        function clearPage() {
+            if(confirm('هل تريد مسح كل محتوى الصفحة الحالية؟')) {
+                const page = document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length - 1];
+                page.innerHTML = '<div class="page-content"></div><div class="page-footer"><div class="company-name">Sigma Shoes EG</div><div class="print-date" id="printDate1"></div></div>';
+                updatePrintDate('printDate1');
+                selectedImage = null;
+                selectedBlock = null;
+                selectedCells = [];
+                activeTable = null;
+            }
+        }
+        
+        // ===============================================
+        // إعداد معالجات الصور (للاستخدام المشترك)
+        // ===============================================
+        function setupImageHandlers(wrapper) {
+            const img = wrapper.querySelector('img');
+            if(!img) return;
+            
+            // إعداد جميع المقابض
+            const handles = {
+                'bottom-right': wrapper.querySelector('.img-handle.bottom-right'),
+                'bottom-left': wrapper.querySelector('.img-handle.bottom-left'),
+                'top-right': wrapper.querySelector('.img-handle.top-right'),
+                'top-left': wrapper.querySelector('.img-handle.top-left')
+            };
+            
+            Object.keys(handles).forEach(key => {
+                const handle = handles[key];
+                if(!handle) return;
+                
+                let startX, startY, startW, startH;
+                handle.addEventListener('mousedown', e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startW = parseInt(getComputedStyle(wrapper).width);
+                    startH = parseInt(getComputedStyle(wrapper).height) || (startW * img.naturalHeight / img.naturalWidth);
+                    
+                    const move = e => {
+                        let deltaX, deltaY;
+                        if(key.includes('right')) {
+                            deltaX = startX - e.clientX;
+                        } else {
+                            deltaX = e.clientX - startX;
+                        }
+                        if(key.includes('bottom')) {
+                            deltaY = e.clientY - startY;
+                        } else {
+                            deltaY = startY - e.clientY;
+                        }
+                        
+                        const newW = Math.max(50, startW + (key.includes('right') ? deltaX : -deltaX));
+                        const newH = newW * img.naturalHeight / img.naturalWidth;
+                        wrapper.style.width = newW + 'px';
+                        wrapper.style.height = newH + 'px';
+                    };
+                    
+                    const stop = () => {
+                        document.removeEventListener('mousemove', move);
+                        document.removeEventListener('mouseup', stop);
+                    };
+                    
+                    document.addEventListener('mousemove', move);
+                    document.addEventListener('mouseup', stop);
+                });
+            });
+        }
+        
+        // ===============================================
+        // إضافة صورة مع اختيار الصفحة
+        // ===============================================
+        function addImageWithPageSelect() {
+            const pages = document.querySelectorAll('.page-container');
+            if(pages.length === 0) {
+                alert('لا توجد صفحات. أضف صفحة أولاً.');
+                return;
+            }
+            
+            if(pages.length === 1) {
+                // صفحة واحدة فقط - أضف الصورة مباشرة
+                document.getElementById('logoInput').click();
+            } else {
+                // عدة صفحات - اختر الصفحة
+                let options = '';
+                pages.forEach((page, index) => {
+                    const pageNum = page.querySelector('.page-header span').textContent;
+                    options += `<option value="${page.id}">${pageNum}</option>`;
+                });
+                
+                const selectedPage = prompt(`اختر رقم الصفحة (1-${pages.length}):\n${Array.from(pages).map((p, i) => `${i+1}. ${p.querySelector('.page-header span').textContent}`).join('\n')}`);
+                
+                if(selectedPage) {
+                    const pageIndex = parseInt(selectedPage) - 1;
+                    if(pageIndex >= 0 && pageIndex < pages.length) {
+                        window.selectedPageForImage = pages[pageIndex].id;
+                        document.getElementById('logoInput').click();
+                    }
+                }
+            }
+        }
+        
         function handleImageUpload(i) {
-            if(i.files[0]) { const r=new FileReader(); r.onload=e=>{
-                const p=document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length-1];
-                const d=document.createElement('div'); d.className='editable-block'; d.style.textAlign='center';
-                d.innerHTML=`<div class="block-tools"><button class="mini-btn danger-btn" onclick="this.closest('.editable-block').remove()">X</button></div><div class="resizable-img-wrapper" style="width:200px"><img src="${e.target.result}"><div class="img-handle"></div></div>`;
-                p.appendChild(d);
-                const h=d.querySelector('.img-handle'), w=d.querySelector('.resizable-img-wrapper');
-                let sx,sw; h.addEventListener('mousedown',e=>{e.preventDefault(); e.stopPropagation(); sx=e.clientX; sw=parseInt(getComputedStyle(w).width); document.addEventListener('mousemove',dm); document.addEventListener('mouseup',sm);});
-                const dm=e=>w.style.width=(sw+(sx-e.clientX))+'px'; const sm=()=>{document.removeEventListener('mousemove',dm); document.removeEventListener('mouseup',sm);}
-            }; r.readAsDataURL(i.files[0]); } i.value='';
+            if(i.files[0]) { 
+                const r=new FileReader(); 
+                r.onload=e=>{
+                    let p;
+                    if(window.selectedPageForImage) {
+                        p = document.getElementById(window.selectedPageForImage).querySelector('.a4-page');
+                        window.selectedPageForImage = null;
+                    } else {
+                        p = document.querySelectorAll('.a4-page')[document.querySelectorAll('.a4-page').length-1];
+                    }
+                    const d=document.createElement('div'); 
+                    d.className='editable-block'; 
+                    d.style.textAlign='center';
+                    d.style.position='relative';
+                    
+                    // وضع الصورة في وسط الصفحة
+                    const pageRect = p.getBoundingClientRect();
+                    const centerX = (pageRect.width / 2) - 100;
+                    const centerY = (pageRect.height / 2) - 100;
+                    
+                    d.innerHTML=`<div class="block-tools"><button class="mini-btn danger-btn" onclick="deleteBlock(this)">X</button></div>
+                        <div class="resizable-img-wrapper selected-img" style="left:${centerX}px; top:${centerY}px; width:200px;">
+                            <img src="${e.target.result}">
+                            <div class="img-handle bottom-right"></div>
+                            <div class="img-handle bottom-left"></div>
+                            <div class="img-handle top-right"></div>
+                            <div class="img-handle top-left"></div>
+                            <div class="img-controls">
+                                <button onclick="resizeImage(50)" title="تصغير">🔽</button>
+                                <button onclick="resizeImage(100)" title="عادي">⏹️</button>
+                                <button onclick="resizeImage(150)" title="تكبير">🔼</button>
+                                <button onclick="alignImage('left')">⬅️</button>
+                                <button onclick="alignImage('center')">⏺️</button>
+                                <button onclick="alignImage('right')">➡️</button>
+                                <button class="danger-btn" onclick="deleteBlock(this)">🗑️</button>
+                            </div>
+                            <div class="img-margin-controls">
+                                <div class="margin-input-group">
+                                    <label>هامش علوي:</label>
+                                    <input type="number" id="marginTop" value="0" min="0" onchange="applyImageMargin('top', this.value)">
+                                </div>
+                                <div class="margin-input-group">
+                                    <label>هامش سفلي:</label>
+                                    <input type="number" id="marginBottom" value="0" min="0" onchange="applyImageMargin('bottom', this.value)">
+                                </div>
+                                <div class="margin-input-group">
+                                    <label>هامش أيمن:</label>
+                                    <input type="number" id="marginRight" value="0" min="0" onchange="applyImageMargin('right', this.value)">
+                                </div>
+                                <div class="margin-input-group">
+                                    <label>هامش أيسر:</label>
+                                    <input type="number" id="marginLeft" value="0" min="0" onchange="applyImageMargin('left', this.value)">
+                                </div>
+                                <div class="margin-input-group">
+                                    <label>Padding علوي:</label>
+                                    <input type="number" id="paddingTop" value="0" min="0" onchange="applyImagePadding('top', this.value)">
+                                </div>
+                                <div class="margin-input-group">
+                                    <label>Padding سفلي:</label>
+                                    <input type="number" id="paddingBottom" value="0" min="0" onchange="applyImagePadding('bottom', this.value)">
+                                </div>
+                                <div class="margin-input-group">
+                                    <label>Padding أيمن:</label>
+                                    <input type="number" id="paddingRight" value="0" min="0" onchange="applyImagePadding('right', this.value)">
+                                </div>
+                                <div class="margin-input-group">
+                                    <label>Padding أيسر:</label>
+                                    <input type="number" id="paddingLeft" value="0" min="0" onchange="applyImagePadding('left', this.value)">
+                                </div>
+                            </div>
+                        </div>`;
+                    p.appendChild(d);
+                    
+                    const wrapper = d.querySelector('.resizable-img-wrapper');
+                    selectedImage = wrapper;
+                    setupImageHandlers(wrapper);
+                }; 
+                r.readAsDataURL(i.files[0]); 
+            } 
+            i.value='';
         }
         
         let pn=1;
         function addPage() {
             pn++; const id='p'+pn; const d=document.createElement('div'); d.id=id; d.className='page-container';
-            d.innerHTML=`<div class="page-header"><span>صفحة ${pn}</span><button onclick="printThisPage('${id}')" class="primary-btn" style="padding:2px">🖨️ طباعة</button></div><div class="a4-page"><div class="editable-block" contenteditable="true"><p>...</p></div></div>`;
-            document.getElementById('workspace').appendChild(d); d.scrollIntoView({behavior:'smooth'});
+            const dateId = 'printDate' + pn;
+            d.innerHTML=`<div class="page-header"><span>صفحة ${pn}</span><div style="display:flex; gap:5px;"><button onclick="printThisPage('${id}')" class="primary-btn" style="padding:2px 8px; font-size:11px;">🖨️ طباعة</button><button onclick="deletePage('${id}')" class="danger-btn" style="padding:2px 8px; font-size:11px;" title="حذف الصفحة">🗑️ حذف</button></div></div><div class="a4-page"><div class="page-content"></div><div class="page-footer"><div class="company-name">Sigma Shoes EG</div><div class="print-date" id="${dateId}"></div></div></div>`;
+            document.getElementById('workspace').appendChild(d); 
+            updatePrintDate(dateId);
+            setTimeout(() => {
+                d.scrollIntoView({behavior:'smooth', block:'nearest'});
+            }, 100);
         }
+        
+        // ===============================================
+        // حذف صفحة كاملة
+        // ===============================================
+        function deletePage(pageId) {
+            const page = document.getElementById(pageId);
+            if(!page) return;
+            
+            const pageNumber = page.querySelector('.page-header span').textContent.replace('صفحة ', '');
+            const totalPages = document.querySelectorAll('.page-container').length;
+            
+            if(totalPages <= 1) {
+                alert('لا يمكن حذف الصفحة الأخيرة. يجب أن تبقى صفحة واحدة على الأقل.');
+                return;
+            }
+            
+            if(confirm(`هل تريد حذف ${pageNumber} بالكامل؟`)) {
+                page.remove();
+                
+                // إعادة ترقيم الصفحات المتبقية
+                const remainingPages = document.querySelectorAll('.page-container');
+                remainingPages.forEach((p, index) => {
+                    const header = p.querySelector('.page-header span');
+                    if(header) {
+                        header.textContent = `صفحة ${index + 1}`;
+                    }
+                });
+            }
+        }
+        // ===============================================
+        // تحديث تاريخ الطباعة
+        // ===============================================
+        function updatePrintDate(dateId) {
+            const dateElement = document.getElementById(dateId);
+            if(dateElement) {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('ar-EG', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                dateElement.textContent = `تاريخ الطباعة: ${dateStr}`;
+            }
+        }
+        
+        // تحديث جميع تواريخ الطباعة
+        function updateAllPrintDates() {
+            document.querySelectorAll('.print-date').forEach((el, index) => {
+                if(!el.id) el.id = 'printDate' + (index + 1);
+                updatePrintDate(el.id);
+            });
+        }
+        
+        // تحديث التواريخ عند تحميل الصفحة
+        if(document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                updateAllPrintDates();
+            });
+        } else {
+            // الصفحة محملة بالفعل
+            updateAllPrintDates();
+        }
+        
+        // ===============================================
+        // حذف النص عند النقر عليه
+        // ===============================================
+        let deleteClickTimeout = null;
+        let lastClickedElement = null;
+        
+        function deleteTextBlock(element, event) {
+            // منع الحذف إذا كان النقر على زر أو عنصر تحكم
+            if(event.target.tagName === 'BUTTON' || 
+               event.target.closest('.block-tools') || 
+               event.target.closest('.img-controls') ||
+               event.target.closest('.img-margin-controls')) {
+                return;
+            }
+            
+            const block = element.closest('.editable-block');
+            if(!block || !block.classList.contains('deletable-text')) {
+                return;
+            }
+            
+            // إذا كان العنصر في حالة تحرير، لا نحذفه
+            if(document.activeElement === element || 
+               element.contains(document.activeElement) ||
+               block.querySelector(':focus')) {
+                return; // السماح بالتحرير
+            }
+            
+            // منع الانتشار
+            event.stopPropagation();
+            
+            // إذا كان نفس العنصر تم النقر عليه مرتين بسرعة، احذفه
+            if(lastClickedElement === block && deleteClickTimeout) {
+                clearTimeout(deleteClickTimeout);
+                deleteClickTimeout = null;
+                lastClickedElement = null;
+                
+                if(confirm('هل تريد حذف هذا النص بالكامل؟')) {
+                    block.remove();
+                }
+                return;
+            }
+            
+            // النقر الأول - انتظر قليلاً لمعرفة إذا كان هناك نقر ثاني
+            lastClickedElement = block;
+            deleteClickTimeout = setTimeout(() => {
+                // إذا مرت 300ms بدون نقر ثاني، اعرض رسالة
+                if(confirm('هل تريد حذف هذا النص بالكامل؟\n(انقر مرة أخرى للحذف مباشرة)')) {
+                    block.remove();
+                }
+                deleteClickTimeout = null;
+                lastClickedElement = null;
+            }, 300);
+        }
+        
+        // حذف مباشر عند النقر المزدوج
+        document.addEventListener('dblclick', function(e) {
+            const deletable = e.target.closest('.deletable-text');
+            if(deletable && !e.target.closest('.block-tools')) {
+                clearTimeout(deleteClickTimeout);
+                deleteClickTimeout = null;
+                lastClickedElement = null;
+                
+                if(confirm('هل تريد حذف هذا النص بالكامل؟')) {
+                    deletable.remove();
+                }
+            }
+        });
+        
         function printThisPage(id) {
+            // تحديث تاريخ الطباعة قبل الطباعة
+            const page = document.getElementById(id);
+            if(page) {
+                const dateElement = page.querySelector('.print-date');
+                if(dateElement) {
+                    updatePrintDate(dateElement.id || 'printDate1');
+                }
+            }
+            
             document.querySelectorAll('.page-container').forEach(c=>c.style.display='none');
             const t=document.getElementById(id); t.style.display='block'; t.style.position='absolute'; t.style.top='0'; t.style.width='100%';
             window.print(); setTimeout(()=>{document.querySelectorAll('.page-container').forEach(c=>{c.style.display='block'; c.style.position='relative';})},500);
