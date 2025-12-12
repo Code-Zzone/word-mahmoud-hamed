@@ -3,570 +3,465 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محرر متقدم وشامل - بديل Excel و Word</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>المحرر الاحترافي - نسخة التنسيق الكامل</title>
+    <!-- استدعاء مكتبة خطوط عربية متنوعة -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;600;700&family=Tajawal:wght@400;700&family=Almarai:wght@400;800&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* ----------------------------------- */
-        /* التنسيق الأساسي والواجهة */
-        /* ----------------------------------- */
+        /* ========================================= */
+        /* التنسيقات الأساسية */
+        /* ========================================= */
+        :root {
+            --primary: #1976d2; /* أزرق احترافي */
+            --bg: #eceff1;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg);
             margin: 0;
-            padding: 20px;
-            direction: rtl; 
+            padding-top: 140px; /* مساحة للشريط */
+            direction: rtl;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 30px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        /* شريط الأدوات */
+        .toolbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 120px; background: white;
+            border-bottom: 3px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: flex; gap: 15px; padding: 5px 20px;
+            align-items: center; overflow-x: auto;
         }
 
-        /* جعل جميع العناوين قابلة للتحرير */
-        h1, h2 {
-            color: #333;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-            text-align: center;
-            outline: none;
+        .group {
+            display: flex; flex-direction: column; align-items: center;
+            border-left: 1px solid #ddd; padding-left: 15px; min-width: max-content;
         }
-        
-        /* ----------------------------------- */
-        /* شريط التحكم (الأزرار) */
-        /* ----------------------------------- */
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-        }
+        .group-title { font-size: 11px; color: #78909c; margin-bottom: 5px; font-weight: bold; }
+        .row { display: flex; gap: 5px; align-items: center; }
 
+        /* الأزرار والقوائم */
         button, select {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-weight: bold;
+            padding: 6px 10px; border: 1px solid #cfd8dc; background: #fff;
+            cursor: pointer; border-radius: 4px; font-family: 'Cairo'; font-size: 13px;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px;
         }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        /* ----------------------------------- */
-        /* محرر النصوص (Word البديل) */
-        /* ----------------------------------- */
-        .editor-section {
-            margin-bottom: 30px;
-            border: 1px solid #ccc;
-            padding: 15px;
-            border-radius: 5px;
-            background-color: #fff;
-        }
-
-        .text-editor {
-            min-height: 300px;
-            border: 1px solid #ddd;
-            padding: 20px;
-            font-size: 16px;
-            line-height: 1.6;
-            outline: none;
-            margin-top: 10px;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .toolbar button, .toolbar select {
-            background-color: #6c757d;
-            padding: 5px 10px;
-            font-size: 14px;
-            margin-left: 5px;
-        }
+        button:hover { background: #e3f2fd; border-color: var(--primary); }
         
-        /* ----------------------------------- */
-        /* محرر الجداول (Excel البديل) */
-        /* ----------------------------------- */
-        .sheet-section {
-            overflow-x: auto; 
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            min-width: 600px; 
-        }
-
-        .data-table th, .data-table td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: right; /* المحاذاة الافتراضية */
-            min-width: 100px; 
-            outline: none;
-        }
-
-        .data-table th {
-            background-color: #e9ecef;
-            color: #333;
-        }
-
-        /* تنسيقات المحاذاة الجديدة للخلايا */
-        .align-left { text-align: left !important; }
-        .align-center { text-align: center !important; }
-        .align-right { text-align: right !important; }
-
-        /* تحديد الخلايا */
-        .selected-cell {
-            background-color: #ffc107 !important;
-            outline: 2px solid #007bff;
-        }
-        .multi-selected-cell {
-            background-color: #ffc10750 !important;
-        }
-        .excel-controls button {
-            background-color: #28a745;
-        }
+        button.primary-btn { background: var(--primary); color: white; border: none; }
+        button.danger-btn { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
         
-        /* ----------------------------------- */
-        /* تنسيق الطباعة (يجب الاحتفاظ به للطباعة الشاملة) */
-        /* ----------------------------------- */
+        button.active-btn { background: #bbdefb; border-color: var(--primary); }
+
+        /* الورقة */
+        .workspace {
+            display: flex; flex-direction: column; align-items: center; gap: 30px; padding-bottom: 50px;
+        }
+        .page-container { position: relative; }
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #546e7a; color: white; padding: 5px 15px;
+            border-radius: 5px 5px 0 0; font-size: 12px;
+        }
+        .a4-page {
+            width: 210mm; min-height: 297mm;
+            background: white; padding: 20mm;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative; box-sizing: border-box;
+        }
+
+        /* الكتل القابلة للتعديل */
+        .editable-block {
+            position: relative; border: 1px dashed transparent; margin-bottom: 5px;
+            min-height: 30px; /* لضمان القدرة على النقر */
+        }
+        .editable-block:hover { border-color: #b0bec5; }
+        
+        .block-tools {
+            position: absolute; right: -35px; top: 0;
+            display: none; flex-direction: column; gap: 3px;
+        }
+        .editable-block:hover .block-tools { display: flex; }
+        .mini-btn { width: 28px; height: 28px; border-radius: 50%; padding: 0; }
+
+        /* ========================================= */
+        /* جداول Excel Style */
+        /* ========================================= */
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 0 auto; }
+        th, td { border: 1px solid #bbb; padding: 5px; position: relative; word-wrap: break-word; }
+        th { background-color: #f5f5f5; font-weight: bold; text-align: center; }
+        
+        .resizer {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+            cursor: col-resize; user-select: none; z-index: 10;
+        }
+        .selected { outline: 2px solid var(--primary); background-color: rgba(25, 118, 210, 0.1); }
+
+        /* ========================================= */
+        /* الصور */
+        /* ========================================= */
+        .resizable-img-wrapper {
+            display: inline-block; position: relative; border: 1px solid transparent;
+            vertical-align: middle;
+        }
+        .resizable-img-wrapper:hover { border: 1px dashed var(--primary); }
+        .resizable-img-wrapper img { display: block; max-width: 100%; pointer-events: none; }
+        .img-handle {
+            width: 12px; height: 12px; background: var(--primary);
+            position: absolute; bottom: -6px; left: -6px; cursor: sw-resize;
+            display: none; border-radius: 50%;
+        }
+        .resizable-img-wrapper:hover .img-handle { display: block; }
+
+        /* الطباعة */
         @media print {
-            body { background-color: white !important; padding: 0; }
-            /* إخفاء الأزرار فقط عند الطباعة الشاملة */
-            .controls:not(.print-temp), .toolbar:not(.print-temp), .excel-controls:not(.print-temp), .no-print:not(.print-temp) { 
-                display: none !important; 
-            }
-            .container { box-shadow: none !important; padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
-            .text-editor, .sheet-section { border: none !important; min-height: initial !important; }
-            /* إظهار حدود الجدول في الطباعة */
-            .data-table th, .data-table td { border: 1px solid #000 !important; padding: 5px !important; }
+            .toolbar, .page-header, .block-tools, .img-handle { display: none !important; }
+            .page-container { display: none; }
+            .page-container.print-active { display: block; position: absolute; top: 0; left: 0; width: 100%; }
+            .a4-page { box-shadow: none; margin: 0; width: 100%; height: auto; }
+            .editable-block { border: none !important; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container" id="printable-content">
-        <h1 contenteditable="true">محرر متقدم وشامل (العنوان الرئيسي قابل للتحرير)</h1>
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <!-- خفي: لرفع الصور -->
+        <input type="file" id="logoInput" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
 
-        <div class="controls no-print">
-            <button onclick="printAllContent()">**زر الطباعة الشاملة:** اطبع المحتوى بالكامل</button>
-            <button onclick="downloadPDF()">**زر تحميل PDF:** حمل المستند كملف PDF</button>
-            <button onclick="saveHTML()">**حفظ الملف:** حفظ كملف HTML للتعديل لاحقاً</button>
+        <div class="group">
+            <span class="group-title">إدراج</span>
+            <div class="row">
+                <button onclick="addBlock('table')" class="primary-btn">▦ جدول</button>
+                <button onclick="document.getElementById('logoInput').click()" style="background:#e1f5fe; color:#0277bd;">🖼️ صورة</button>
+                <button onclick="addBlock('heading')" style="font-weight:bold;">H عنوان</button>
+                <button onclick="addBlock('text')">📝 نص</button>
+            </div>
         </div>
 
-        <div class="editor-section" id="text-section">
-            <h2 contenteditable="true">محرر النصوص والمقالات (Word البديل)</h2>
-            
-            <div class="toolbar no-print">
-                <button onclick="formatDoc('bold')">**B**</button>
-                <button onclick="formatDoc('italic')">_I_</button>
-                <button onclick="formatDoc('underline')">U</button>
-                <button onclick="formatDoc('justifyLeft')">⬅️ محاذاة لليسار</button>
-                <button onclick="formatDoc('justifyCenter')">**وسط**</button>
-                <button onclick="formatDoc('justifyRight')">محاذاة لليمين ➡️</button>
-                <button onclick="formatDoc('insertUnorderedList')">• قائمة منقطة</button>
-                <select onchange="formatDoc('fontSize', this.value); this.value='';" title="حجم الخط">
-                    <option value="" selected disabled>حجم</option>
-                    <option value="3">صغير</option>
-                    <option value="5">متوسط</option>
-                    <option value="7">كبير</option>
+        <div class="group">
+            <span class="group-title">الخط والتنسيق</span>
+            <div class="row">
+                <select id="fontSelect" onchange="changeFont(this.value)" style="width: 110px;">
+                    <option value="Cairo">خط Cairo</option>
+                    <option value="Amiri">خط أميري</option>
+                    <option value="Tajawal">خط تجوال</option>
+                    <option value="Almarai">خط المراعي</option>
+                    <option value="Reem Kufi">خط كوفي</option>
+                    <option value="Arial">Arial</option>
                 </select>
-                <input type="color" onchange="formatDoc('foreColor', this.value)" title="لون الخط">
-                <input type="color" onchange="formatDoc('backColor', this.value)" title="لون الخلفية">
-                <button style="background-color: #009688;" onclick="printSpecificSection('text-section')">🖨️ طباعة قسم النصوص فقط</button>
             </div>
-            
-            <div id="textEditor" class="text-editor" contenteditable="true">
-                <h3>هذا العنوان الفرعي قابل للتحرير أيضاً.</h3>
-                <p style="text-align: center;">يمكنك تنسيق النص بأي شكل باستخدام شريط الأدوات أعلاه. **جرب الآن زر التوسيط الجديد!**</p>
-                <ul>
-                    <li>اضغط على Enter لبدء سطر جديد.</li>
-                    <li>اضغط على الأزرار لتنسيق النص المختار.</li>
-                </ul>
+            <div class="row" style="margin-top:5px;">
+                <button onclick="document.execCommand('bold')" title="عريض"><b>B</b></button>
+                <button onclick="document.execCommand('italic')" title="مائل"><i>I</i></button>
+                <input type="number" id="fontSize" value="14" style="width:50px; text-align:center" onchange="changeSize(this.value)">
+                <span style="font-size:11px">px</span>
             </div>
         </div>
 
-        <div class="editor-section sheet-section" id="sheet-section">
-            <h2 contenteditable="true">محرر الجداول (Excel البديل)</h2>
-            <p style="font-size: 14px; color: #6c757d;">(للتحديد المتعدد لدمج الخلايا: استخدم مفتاح **Ctrl** أو **Command** مع النقر.)</p>
-            
-            <div class="excel-controls no-print">
-                <button onclick="addRow()">➕ إضافة صف</button>
-                <button onclick="addColumn()">➕ إضافة عمود</button>
-                <button style="background-color: #dc3545;" onclick="removeSelectedRow()">🗑️ حذف الصف المحدد</button>
-                <button style="background-color: #dc3545;" onclick="removeSelectedColumn()">🗑️ حذف العمود المحدد</button>
-                <button style="background-color: #ffc107; color: #333;" onclick="mergeCells()">🔗 دمج الخلايا</button>
-                <button style="background-color: #ffc107; color: #333;" onclick="unmergeCell()">💔 إلغاء الدمج</button>
-                <button onclick="calculateSum()">∑ حساب المجموع</button>
-
-                <button style="background-color: #17a2b8;" onclick="alignCell('left')">محاذاة لليسار</button>
-                <button style="background-color: #17a2b8;" onclick="alignCell('center')">**توسيط**</button>
-                <button style="background-color: #17a2b8;" onclick="alignCell('right')">محاذاة لليمين</button>
-                <button style="background-color: #009688;" onclick="printSpecificSection('sheet-section')">🖨️ طباعة قسم الجداول فقط</button>
+        <div class="group">
+            <span class="group-title">محاذاة</span>
+            <div class="row">
+                <button onclick="setAlignment('right')" title="يمين">➡️</button>
+                <button onclick="setAlignment('center')" title="توسط">⏺️</button>
+                <button onclick="setAlignment('left')" title="يسار">⬅️</button>
             </div>
-            
-            <table class="data-table" id="dataTable">
-                <thead>
-                    <tr>
-                        <th contenteditable="true">العنوان 1 (كمية)</th>
-                        <th contenteditable="true">العنوان 2 (السعر)</th>
-                        <th contenteditable="true">العنوان 3 (المنتج)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td contenteditable="true">100</td>
-                        <td contenteditable="true">250</td>
-                        <td contenteditable="true" class="align-right">منتج أ</td>
-                    </tr>
-                    <tr>
-                        <td contenteditable="true">400</td>
-                        <td contenteditable="true">500</td>
-                        <td contenteditable="true" class="align-right">منتج ب</td>
-                    </tr>
-                </tbody>
-            </table>
+        </div>
+
+        <div class="group">
+            <span class="group-title">أدوات الجدول</span>
+            <div class="row">
+                <button onclick="execTable('addrow')">➕ صف</button>
+                <button onclick="execTable('addcol')">➕ عمود</button>
+                <button onclick="deleteFullTable()" class="danger-btn" title="حذف الجدول">🗑️ حذف جدول</button>
+            </div>
+            <div class="row" style="margin-top:5px;">
+                <input type="color" id="colorInput" value="#fff176" title="لون التمييز">
+                <button onclick="applyColor('row')">لون صف</button>
+                <button onclick="autoNumber()">🔢 ترقيم</button>
+            </div>
+        </div>
+
+        <div class="group" style="margin-right:auto;">
+             <button onclick="addPage()" style="background:#37474f; color:#fff;">📄 صفحة جديدة +</button>
+        </div>
+    </div>
+
+    <!-- Workspace -->
+    <div class="workspace" id="workspace">
+        <!-- الصفحة الأولى: فارغة وجاهزة -->
+        <div class="page-container" id="page1">
+            <div class="page-header">
+                <span>صفحة 1</span>
+                <button onclick="printThisPage('page1')" class="primary-btn" style="padding:2px 10px; font-size:11px;">🖨️ طباعة</button>
+            </div>
+            <div class="a4-page">
+                <!-- تم إزالة الجداول الافتراضية، الصفحة بيضاء تماماً -->
+                <div class="editable-block" contenteditable="true" style="color:#aaa; text-align:center; padding:20px;">
+                    <p>اضغط هنا للكتابة أو استخدم الأزرار بالأعلى للإدراج...</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // -----------------------------------
-        // وظائف تحرير النصوص (Word)
-        // -----------------------------------
-        function formatDoc(command, value) {
-            document.execCommand(command, false, value);
-        }
+        // ===============================================
+        // المنطق العام والمتغيرات
+        // ===============================================
+        let selectedCell = null;
+        let selectedTable = null;
+        let activeBlock = null; // لتتبع العنصر النشط (جدول، صورة، نص)
 
-        // -----------------------------------
-        // وظائف الجداول (Excel) - (تم الاحتفاظ بها كما هي، تعمل بشكل جيد)
-        // -----------------------------------
-
-        const dataTable = document.getElementById('dataTable');
-        let selectedCells = []; // لتتبع التحديد المتعدد
-
-        // وظيفة تحديد الخلايا (تسمح بتحديد متعدد باستخدام Ctrl/Cmd) 
-        dataTable.addEventListener('click', function(event) {
-            const cell = event.target.closest('td, th');
-            if (!cell) return;
-
-            if (!event.ctrlKey && !event.metaKey) {
-                // تحديد مفرد جديد (مسح السابق)
-                selectedCells.forEach(c => c.classList.remove('selected-cell', 'multi-selected-cell'));
-                selectedCells = [cell];
-                cell.classList.add('selected-cell');
-            } else {
-                // تحديد/إلغاء تحديد متعدد
-                if (selectedCells.includes(cell)) {
-                    selectedCells = selectedCells.filter(c => c !== cell);
-                    cell.classList.remove('selected-cell', 'multi-selected-cell');
-                } else {
-                    selectedCells.push(cell);
-                    cell.classList.add('multi-selected-cell');
-                    cell.classList.remove('selected-cell');
-                }
+        document.addEventListener('click', function(e) {
+            // تتبع الخلية والجدول
+            if(e.target.closest('td, th')) {
+                if(selectedCell) selectedCell.classList.remove('selected');
+                selectedCell = e.target.closest('td, th');
+                selectedTable = selectedCell.closest('table');
+                selectedCell.classList.add('selected');
             }
-
-            // تحديث التحديد النهائي
-            if (selectedCells.length === 1) {
-                selectedCells[0].classList.add('selected-cell');
-                selectedCells[0].classList.remove('multi-selected-cell');
-            } else if (selectedCells.length > 1) {
-                selectedCells.forEach(c => c.classList.add('multi-selected-cell'));
+            
+            // تتبع البلوك النشط (للمحاذاة)
+            if(e.target.closest('.editable-block')) {
+                activeBlock = e.target.closest('.editable-block');
             }
         });
 
-        // وظيفة محاذاة محتوى الخلية
-        function alignCell(alignment) {
-            const alignClass = `align-${alignment}`;
-            if (selectedCells.length === 0) {
-                alert('الرجاء تحديد خلية واحدة أو أكثر للمحاذاة.');
-                return;
-            }
-
-            selectedCells.forEach(cell => {
-                cell.classList.remove('align-left', 'align-center', 'align-right');
-                cell.classList.add(alignClass);
-            });
-        }
-        
-        // ... (بقية دوال Excel: addRow, addColumn, removeSelectedRow, removeSelectedColumn, mergeCells, unmergeCell, calculateSum) ...
-        // (تم حذفها من الرد هنا للاختصار، لكنها موجودة في الكود الكامل فوق)
-        function addRow() {
-            const tBody = dataTable.tBodies[0];
-            const colCount = dataTable.rows[0].cells.length;
-            const newRow = tBody.insertRow(-1); 
-            for (let i = 0; i < colCount; i++) {
-                const newCell = newRow.insertCell(i);
-                newCell.contentEditable = 'true';
-                newCell.textContent = '';
-                newCell.classList.add('align-right'); 
-            }
-        }
-
-        function addColumn() {
-            const headerRow = dataTable.tHead.rows[0];
-            const newHeader = document.createElement('th');
-            newHeader.textContent = `عمود جديد`;
-            newHeader.contentEditable = 'true';
-            headerRow.appendChild(newHeader);
-
-            const bodyRows = dataTable.tBodies[0].rows;
-            for (let i = 0; i < bodyRows.length; i++) {
-                const newCell = bodyRows[i].insertCell(-1); 
-                newCell.contentEditable = 'true';
-                newCell.textContent = '';
-                newCell.classList.add('align-right'); 
-            }
-        }
-        
-        function removeSelectedRow() {
-            if (selectedCells.length !== 1 || selectedCells[0].tagName === 'TH') {
-                alert('الرجاء النقر على خلية واحدة في الصف (غير العنوان) المراد حذفه.');
-                return;
-            }
-            const selectedRow = selectedCells[0].parentElement;
-            if (confirm('هل أنت متأكد من حذف هذا الصف؟')) {
-                selectedRow.remove();
-                selectedCells = [];
-            }
-        }
-
-        function removeSelectedColumn() {
-            if (selectedCells.length !== 1) {
-                alert('الرجاء النقر على خلية واحدة لتحديد العمود المراد حذفه.');
-                return;
-            }
-
-            if (confirm('هل أنت متأكد من حذف هذا العمود بالكامل؟')) {
-                const columnIndex = selectedCells[0].cellIndex;
-                dataTable.tHead.rows[0].deleteCell(columnIndex);
-                const bodyRows = dataTable.tBodies[0].rows;
-                for (let i = 0; i < bodyRows.length; i++) {
-                    bodyRows[i].deleteCell(columnIndex);
-                }
-                selectedCells = [];
-            }
-        }
-        
-        function mergeCells() {
-            if (selectedCells.length < 2) {
-                alert('الرجاء تحديد خليتين أو أكثر باستخدام مفتاح Ctrl/Command مع النقر للدمج.');
-                return;
-            }
-            const rows = Array.from(new Set(selectedCells.map(c => c.parentElement.rowIndex)));
-            const cols = Array.from(new Set(selectedCells.map(c => c.cellIndex)));
-
-            if (rows.length === 0 || cols.length === 0) return;
-
-            const rowSpan = rows.length;
-            const colSpan = cols.length;
-
-            const firstCell = dataTable.rows[Math.min(...rows)].cells[Math.min(...cols)];
+        // ===============================================
+        // المحاذاة والخطوط (جديد)
+        // ===============================================
+        function setAlignment(align) {
+            // الأولوية: 1. النص المحدد 2. البلوك النشط
             
-            if (!firstCell) return;
+            // محاولة محاذاة النص المحدد (داخل خلية أو فقرة)
+            document.execCommand('justify' + capitalize(align), false, null);
 
-            firstCell.setAttribute('rowspan', rowSpan);
-            firstCell.setAttribute('colspan', colSpan);
-            firstCell.classList.remove('multi-selected-cell');
-            firstCell.classList.add('selected-cell');
-
-            selectedCells.filter(c => c !== firstCell).forEach(cell => cell.remove());
-            
-            selectedCells = [firstCell];
-            alert(`تم دمج الخلايا بنجاح: ${rowSpan} صفوف و ${colSpan} أعمدة.`);
-        }
-        
-        function unmergeCell() {
-            if (selectedCells.length !== 1) {
-                alert('الرجاء تحديد الخلية المدموجة المراد إلغاء دمجها.');
-                return;
-            }
-            
-            const cell = selectedCells[0];
-            const rowSpan = parseInt(cell.getAttribute('rowspan') || 1);
-            const colSpan = parseInt(cell.getAttribute('colspan') || 1);
-
-            if (rowSpan <= 1 && colSpan <= 1) {
-                alert('الخلية المحددة ليست مدموجة.');
-                return;
-            }
-
-            if (confirm('هل أنت متأكد من إلغاء دمج هذه الخلية؟ سيتم إدراج خلايا فارغة مكان الدمج.')) {
-                
-                cell.removeAttribute('rowspan');
-                cell.removeAttribute('colspan');
-                
-                const rowIndex = cell.parentElement.rowIndex;
-                const colIndex = cell.cellIndex;
-
-                for (let r = 0; r < rowSpan; r++) {
-                    const row = dataTable.rows[rowIndex + r];
-                    if (row) {
-                        for (let c = 1; c < colSpan; c++) {
-                            const newCell = row.insertCell(colIndex + 1);
-                            newCell.contentEditable = 'true';
-                            newCell.textContent = '';
-                            newCell.classList.add('align-right'); 
-                        }
-                    }
-                }
-                selectedCells = [cell];
+            // محاذاة البلوك نفسه (للجداول والصور)
+            if (activeBlock) {
+                activeBlock.style.textAlign = align;
             }
         }
-        
-        function calculateSum() {
-            if (selectedCells.length === 0) {
-                alert('الرجاء تحديد الخلايا التي تحتوي على الأرقام لحساب مجموعها.');
-                return;
-            }
 
-            let sum = 0;
-            let invalidCount = 0;
+        function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-            selectedCells.forEach(cell => {
-                const value = parseFloat(cell.textContent.trim());
-                if (!isNaN(value)) {
-                    sum += value;
-                } else if (cell.textContent.trim() !== '') {
-                    invalidCount++;
-                }
-            });
-            
-            let message = `مجموع الخلايا المحددة هو: ${sum}`;
-            if (invalidCount > 0) {
-                message += `\n(تم تجاهل ${invalidCount} خلية غير رقمية)`;
-            }
-
-            alert(message);
+        function changeFont(fontName) {
+            document.execCommand('fontName', false, fontName);
         }
 
-        // -----------------------------------
-        // وظائف الطباعة والتحميل (المُحسّنة)
-        // -----------------------------------
-
-        function printAllContent() {
-             window.print();
+        function changeSize(val) {
+            // طريقة لتحسين التحكم بحجم الخط
+            const sel = window.getSelection();
+            if (sel.rangeCount) {
+                // نستخدم execCommand لإنشاء span ثم نعدل حجمه
+                document.execCommand('fontSize', false, '7');
+                const fonts = document.querySelectorAll('font[size="7"]');
+                fonts.forEach(f => {
+                    f.removeAttribute('size');
+                    f.style.fontSize = val + 'px';
+                });
+            }
+            // إذا كان مجرد مؤشر داخل خلية
+            if(selectedCell) selectedCell.style.fontSize = val + 'px';
         }
 
-        /**
-         * طباعة قسم محدد باستخدام نافذة مؤقتة لضمان عزل الطباعة.
-         * @param {string} sectionId - مُعرف القسم المراد طباعته (مثل 'text-section' أو 'sheet-section').
-         */
-        function printSpecificSection(sectionId) {
-            const sectionToPrint = document.getElementById(sectionId);
-            if (!sectionToPrint) {
-                alert('لم يتم العثور على القسم المحدد للطباعة.');
-                return;
+        // ===============================================
+        // الإدراج (عناوين، نصوص، جداول)
+        // ===============================================
+        function addBlock(type) {
+            // البحث عن الصفحة النشطة (الأخيرة افتراضياً)
+            const pages = document.querySelectorAll('.a4-page');
+            const targetPage = pages[pages.length-1];
+
+            const div = document.createElement('div');
+            div.className = 'editable-block';
+            
+            // زر الحذف
+            div.innerHTML = `<div class="block-tools"><button class="mini-btn danger-btn" onclick="this.closest('.editable-block').remove()">X</button></div>`;
+
+            if (type === 'table') {
+                createResizableTable(div);
+            } else if (type === 'text') {
+                div.innerHTML += `<div contenteditable="true" style="padding:5px"><p>نص جديد...</p></div>`;
+            } else if (type === 'heading') {
+                div.innerHTML += `<h1 contenteditable="true" style="margin:5px 0; color:#333; text-align:center;">عنوان رئيسي</h1>`;
             }
 
-            // 1. استخلاص المحتوى المراد طباعته
-            const content = sectionToPrint.innerHTML;
-            
-            // 2. الحصول على جميع تنسيقات CSS (مهم لطباعة سليمة)
-            let styles = '';
-            const allStyles = document.querySelectorAll('style, link[rel="stylesheet"]');
-            allStyles.forEach(style => {
-                if (style.tagName === 'STYLE') {
-                    styles += `<style>${style.innerHTML}</style>`;
-                } else if (style.href) {
-                    styles += `<link rel="stylesheet" href="${style.href}">`;
-                }
-            });
+            targetPage.appendChild(div);
+            // Scroll to bottom
+            div.scrollIntoView({behavior:'smooth', block:'center'});
+        }
 
-            // 3. بناء محتوى النافذة الجديدة
-            const printContent = `
-                <html>
-                <head>
-                    <title>طباعة جزء محدد</title>
-                    <meta charset="UTF-8">
-                    <style>
-                        /* تأكد من إخفاء أزرار التحكم في النافذة المؤقتة */
-                        .no-print { display: none !important; }
-                        /* إعادة ضبط التنسيق الأساسي لطباعة نظيفة */
-                        body { 
-                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                            direction: rtl; 
-                            background-color: white !important; 
-                            padding: 20px; 
-                        }
-                        .editor-section { border: none !important; padding: 0 !important; }
-                        /* إضافة تنسيق الجدول في حال كانت هي الطباعة المخصصة */
-                        .data-table th, .data-table td { border: 1px solid #000 !important; padding: 8px !important; }
-                    </style>
-                    ${styles}
-                </head>
-                <body dir="rtl">
-                    <div style="max-width: 1000px; margin: 0 auto;">
-                        ${content}
-                    </div>
-                </body>
-                </html>
+        // ===============================================
+        // صور (Image Logic)
+        // ===============================================
+        function handleImageUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { insertImage(e.target.result); };
+                reader.readAsDataURL(input.files[0]);
+            }
+            input.value = ''; 
+        }
+
+        function insertImage(src) {
+            const pages = document.querySelectorAll('.a4-page');
+            const targetPage = pages[pages.length-1];
+
+            const div = document.createElement('div');
+            div.className = 'editable-block';
+            div.style.textAlign = 'center'; // افتراض التوسط
+            
+            div.innerHTML = `
+                <div class="block-tools"><button class="mini-btn danger-btn" onclick="this.closest('.editable-block').remove()">X</button></div>
+                <div class="resizable-img-wrapper" style="width: 200px;">
+                    <img src="${src}">
+                    <div class="img-handle"></div>
+                </div>
             `;
-
-            // 4. فتح النافذة وطباعة المحتوى
-            const printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            
-            // الانتظار قليلاً لضمان تحميل التنسيقات ثم الطباعة
-            printWindow.onload = function() {
-                printWindow.print();
-                printWindow.close();
-            };
+            targetPage.appendChild(div);
+            initImageResizers();
         }
 
-        // ... (تم الاحتفاظ بـ saveHTML و downloadPDF كما هما) ...
-        function saveHTML() {
-            const content = document.getElementById('printable-content').innerHTML;
-            const fullHtml = `<html><head><title>مستند محفوظ</title><style>${document.querySelector('style').innerHTML}</style></head><body dir="rtl">${content}</body></html>`;
-            const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'مستند_محرر_شامل.html';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        function initImageResizers() {
+            document.querySelectorAll('.img-handle').forEach(handle => {
+                if(handle.dataset.active) return;
+                handle.dataset.active = "true";
+                
+                let startX, startW, wrapper;
+                handle.addEventListener('mousedown', e => {
+                    e.preventDefault(); e.stopPropagation();
+                    wrapper = handle.closest('.resizable-img-wrapper');
+                    startX = e.clientX;
+                    startW = parseInt(getComputedStyle(wrapper).width);
+                    document.documentElement.addEventListener('mousemove', doDrag);
+                    document.documentElement.addEventListener('mouseup', stopDrag);
+                });
+                
+                function doDrag(e) {
+                    // سحب لليسار يزيد العرض (RTL)
+                    const newW = startW + (startX - e.clientX);
+                    if(newW > 20) wrapper.style.width = newW + 'px';
+                }
+                function stopDrag() {
+                    document.documentElement.removeEventListener('mousemove', doDrag);
+                    document.documentElement.removeEventListener('mouseup', stopDrag);
+                }
+            });
         }
 
-        async function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const content = document.getElementById('printable-content');
-            
-            const controls = document.querySelectorAll('.no-print');
-            controls.forEach(c => c.style.display = 'none');
-            
-            const canvas = await html2canvas(content, { scale: 2, useCORS: true });
-            controls.forEach(c => c.style.display = 'flex');
+        // ===============================================
+        // جداول (Excel Logic)
+        // ===============================================
+        function createResizableTable(container) {
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr><th style="width:50px">م</th><th style="width:200px">البيان</th><th style="width:100px">القيمة</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td></td><td></td></tr>
+                    <tr><td>2</td><td></td><td></td></tr>
+                </tbody>
+            `;
+            table.querySelectorAll('td, th').forEach(c => c.contentEditable = true);
+            container.appendChild(table);
+            initTableResizers(table);
+        }
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4'); 
-            const imgWidth = 210; 
-            const pageHeight = 297; 
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
+        function initTableResizers(table) {
+            const cols = table.querySelectorAll('th');
+            cols.forEach(col => {
+                if(col.querySelector('.resizer')) return;
+                const resizer = document.createElement('div');
+                resizer.className = 'resizer';
+                resizer.contentEditable = false;
+                col.appendChild(resizer);
+                
+                let x = 0, w = 0;
+                resizer.addEventListener('mousedown', e => {
+                    x = e.clientX;
+                    w = parseInt(getComputedStyle(col).width);
+                    document.addEventListener('mousemove', mm);
+                    document.addEventListener('mouseup', mu);
+                });
+                const mm = e => { col.style.width = (w - (x - e.clientX)) + 'px'; };
+                const mu = () => { document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); };
+            });
+        }
 
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+        function deleteFullTable() {
+            if(selectedTable && confirm('حذف الجدول بالكامل؟')) {
+                const block = selectedTable.closest('.editable-block');
+                block ? block.remove() : selectedTable.remove();
+                selectedTable = null; selectedCell = null;
             }
+        }
 
-            pdf.save('مستند_محرر_شامل.pdf');
+        function execTable(act) {
+            if(!selectedTable) return alert('حدد جدولاً');
+            if(act === 'addrow') {
+                const r = selectedTable.insertRow(-1);
+                for(let i=0; i<selectedTable.rows[0].cells.length; i++) {
+                    let c = r.insertCell(); c.contentEditable=true; c.style.border='1px solid #bbb';
+                }
+            }
+            if(act === 'addcol') {
+                for(let r of selectedTable.rows) {
+                    let c = r.insertCell(-1); c.contentEditable=true; c.style.border='1px solid #bbb';
+                    if(r.rowIndex===0) { c.outerHTML='<th>جديد</th>'; setTimeout(()=>initTableResizers(selectedTable),50); }
+                }
+            }
+        }
+
+        function autoNumber() {
+            if(!selectedTable) return;
+            let idx = -1;
+            selectedTable.querySelectorAll('th').forEach((th,i)=> { if(th.innerText.match(/م|#/)) idx=i; });
+            if(idx===-1) {
+                for(let r of selectedTable.rows) {
+                    let c = r.insertCell(0);
+                    if(r.rowIndex===0) c.outerHTML='<th style="width:40px">م</th>';
+                    else { c.style.textAlign='center'; c.style.fontWeight='bold'; c.contentEditable=true; c.style.border='1px solid #bbb'; }
+                }
+                idx=0; setTimeout(()=>initTableResizers(selectedTable),50);
+            }
+            let n=1;
+            for(let i=1; i<selectedTable.rows.length; i++) {
+                if(selectedTable.rows[i].cells[idx]) selectedTable.rows[i].cells[idx].innerText = n++;
+            }
+        }
+
+        function applyColor(type) {
+            const c = document.getElementById('colorInput').value;
+            if(type==='row' && selectedCell) {
+                for(let cell of selectedCell.parentElement.cells) cell.style.backgroundColor = c;
+            }
+        }
+
+        // ===============================================
+        // صفحات
+        // ===============================================
+        let pNum = 1;
+        function addPage() {
+            pNum++;
+            const id = 'page'+pNum;
+            const div = document.createElement('div');
+            div.className='page-container'; div.id=id;
+            div.innerHTML = `
+                <div class="page-header"><span>صفحة ${pNum}</span><button onclick="printThisPage('${id}')" class="primary-btn" style="padding:2px 10px; font-size:11px;">🖨️ طباعة</button></div>
+                <div class="a4-page"><div class="editable-block" contenteditable="true" style="padding:10px"><p>صفحة جديدة...</p></div></div>
+            `;
+            document.getElementById('workspace').appendChild(div);
+            div.scrollIntoView({behavior:'smooth'});
+        }
+
+        function printThisPage(id) {
+            document.querySelectorAll('.page-container').forEach(p => p.classList.remove('print-active'));
+            document.getElementById(id).classList.add('print-active');
+            window.print();
         }
     </script>
 </body>
